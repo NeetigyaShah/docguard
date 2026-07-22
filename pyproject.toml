@@ -1,0 +1,44 @@
+[build-system]
+requires = ["setuptools>=68"]
+build-backend = "setuptools.build_meta"
+
+[project]
+name = "docguard"
+version = "0.1.0"
+description = "Self-Healing Technical Documentation: detect stale docs from code changes and generate targeted, validated corrections."
+requires-python = ">=3.11"
+dependencies = [
+    "pydantic>=2.6",
+    "pydantic-settings>=2.2",
+]
+
+[project.optional-dependencies]
+# Real providers / integrations. The core + all tests run WITHOUT these (mock providers).
+openai = ["openai>=1.14"]
+anthropic = ["anthropic>=0.25"]
+github = ["PyGithub>=2.3"]
+vector = ["chromadb>=0.5"]
+dev = ["pytest>=8.0", "ruff>=0.4", "mypy>=1.9"]
+
+[project.scripts]
+docguard = "docguard.cli:main"
+
+[tool.setuptools.packages.find]
+where = ["src"]
+
+[tool.pytest.ini_options]
+pythonpath = ["src"]
+testpaths = ["tests"]
+addopts = "-q"
+
+[tool.ruff]
+line-length = 100
+src = ["src", "tests"]
+
+[tool.ruff.lint]
+select = ["E", "F", "I", "UP", "B"]
+ignore = ["E501", "B905", "UP042"]
+
+[tool.mypy]
+python_version = "3.11"
+ignore_missing_imports = true

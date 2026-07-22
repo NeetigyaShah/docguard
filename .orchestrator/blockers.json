@@ -1,0 +1,6 @@
+{
+  "blockers": [
+    {"id": "BLK-LLM", "type": "BLOCKED_EXTERNAL", "title": "Real LLM validation", "detail": "No OPENAI_API_KEY / ANTHROPIC_API_KEY in env. Mock provider is fully functional; only live-model validation is blocked.", "user_action": "Set OPENAI_API_KEY or ANTHROPIC_API_KEY, then set DOCGUARD_LLM_PROVIDER=openai|anthropic.", "affects": ["F004", "F030"], "resolved": false},
+    {"id": "BLK-GH", "type": "BLOCKED_EXTERNAL", "title": "Real GitHub PR end-to-end", "detail": "No GITHUB_TOKEN in env. gh CLI is authenticated locally, so opt-in real E2E is possible. Integration + payloads tested against a mocked API.", "user_action": "Provide GITHUB_TOKEN (or run inside GitHub Actions) to exercise real PR/comment creation.", "affects": ["F050"], "resolved": false}
+  ]
+}

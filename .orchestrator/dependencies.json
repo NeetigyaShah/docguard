@@ -1,0 +1,18 @@
+{
+  "dag": {
+    "F001": [], "F002": [], "F003": ["F001", "F002"], "F004": ["F003"],
+    "F010": ["F001"], "F011": ["F001", "F010"], "F012": ["F001", "F010"], "F013": ["F011", "F012", "F003"],
+    "F020": ["F001"], "F021": ["F020", "F011"],
+    "F030": ["F013", "F021", "F003"],
+    "F040": ["F030"], "F041": ["F040"], "F042": ["F041"],
+    "F050": ["F042"], "F051": ["F050"], "F052": ["F050"],
+    "F060": ["F013", "F021", "F030", "F040", "F041", "F042"],
+    "F061": ["F060"], "F062": ["F060"], "F063": ["F062"], "F064": ["F062"]
+  },
+  "parallel_groups": [
+    {"after": "phase-0", "features": ["F010", "F012", "F020"], "note": "walker, md-parser, diff parser are independent (disjoint dirs)"},
+    {"after": "F010", "features": ["F011"], "note": "python parser needs walker"},
+    {"after": ["F011", "F012"], "features": ["F013"], "note": "mapping needs both parsers"}
+  ],
+  "conflict_policy": "Every feature owns a disjoint directory; models.py is frozen contract committed first. Orchestrator performs all git ops."
+}

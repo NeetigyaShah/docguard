@@ -1,0 +1,16 @@
+{
+  "project": "DocGuard — Self-Healing Technical Documentation",
+  "root": "D:/self-healing-docs",
+  "current_phase": 0,
+  "active_milestone": "Backbone / contracts",
+  "completion_pct": 0,
+  "features_total": 23,
+  "features_passed": 0,
+  "features_in_progress": 4,
+  "features_blocked": 0,
+  "features_partial": 1,
+  "features_planned": 18,
+  "integration_branch": "integration",
+  "next_action": "Commit backbone to main + integration; write Phase 1 fixtures; fan out parsers.",
+  "updated": "build-session"
+}

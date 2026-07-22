@@ -1,0 +1,11 @@
+{
+  "milestones": [
+    {"phase": 0, "name": "Backbone / contracts", "status": "IN_PROGRESS", "gate": "models+config+mock providers import and are deterministic", "passed_tests": 0, "total_tests": 0},
+    {"phase": 1, "name": "Code + Document Understanding", "status": "PLANNED", "gate": "fixture parsed to correct units/sections + expected links, no spurious links", "passed_tests": 0, "total_tests": 0},
+    {"phase": 2, "name": "Change Detection", "status": "PLANNED", "gate": "scenarios A-G classified correctly", "passed_tests": 0, "total_tests": 0},
+    {"phase": 3, "name": "Staleness Detection", "status": "PLANNED", "gate": "5 labelled scenarios; TP/FP/FN tracked", "passed_tests": 0, "total_tests": 0},
+    {"phase": 4, "name": "Repair + Validation + Confidence", "status": "PLANNED", "gate": "7 scenarios incl byte-identical preservation", "passed_tests": 0, "total_tests": 0},
+    {"phase": 5, "name": "GitHub Action + PR/Comment", "status": "PLANNED", "gate": "docker build, mocked API, payloads, loop prevention, missing creds", "passed_tests": 0, "total_tests": 0},
+    {"phase": 6, "name": "E2E Demo + Dashboard + Metrics", "status": "PLANNED", "gate": "6 E2E scenarios; measured metrics; dashboard builds", "passed_tests": 0, "total_tests": 0}
+  ]
+}
