@@ -729,6 +729,76 @@
       "expected": "True",
       "actual": "True",
       "status": "PASS"
+    },
+    {
+      "id": "H-01",
+      "phase": 7,
+      "kind": "orchestrator",
+      "description": "[precision] focused section (heading/short blurb) counts as documentation",
+      "input": "_exact(Widget, 'Widget' heading) + short MAX_TRIES blurb",
+      "expected": "True",
+      "actual": "True",
+      "status": "PASS"
+    },
+    {
+      "id": "H-02",
+      "phase": 7,
+      "kind": "orchestrator",
+      "description": "[precision] lone mention in long tutorial is NOT documentation (over-link fix)",
+      "input": "_exact(Widget, 280-char guide mentioning `Widget` once)",
+      "expected": "False",
+      "actual": "False",
+      "status": "PASS"
+    },
+    {
+      "id": "H-03",
+      "phase": 7,
+      "kind": "orchestrator",
+      "description": "[precision] build_links drops EXACT over-link to tutorial, keeps focused",
+      "input": "build_links([Widget],[focused,tutorial])",
+      "expected": "focused EXACT-linked; tutorial not EXACT",
+      "actual": "focused EXACT-linked; tutorial not EXACT",
+      "status": "PASS"
+    },
+    {
+      "id": "H-04",
+      "phase": 7,
+      "kind": "orchestrator",
+      "description": "[repair] real repair prompt now includes NEW code (root-cause of no-change)",
+      "input": "_repair_prompt(rename verdict/impact)",
+      "expected": "contains 'def greet(username)'",
+      "actual": "contains 'def greet(username)'",
+      "status": "PASS"
+    },
+    {
+      "id": "H-05",
+      "phase": 7,
+      "kind": "orchestrator",
+      "description": "[repair] valid JSON completion applies change + fills unified_diff",
+      "input": "_JsonLLM stub returns {repaired,changed:true}",
+      "expected": "changed=True, diff non-empty",
+      "actual": "changed=True, diff non-empty",
+      "status": "PASS"
+    },
+    {
+      "id": "H-06",
+      "phase": 7,
+      "kind": "orchestrator",
+      "description": "[repair] malformed JSON (unescaped newline) salvaged into repaired text",
+      "input": "stub returns broken JSON",
+      "expected": "changed=True, contains 'username'",
+      "actual": "changed=True, contains 'username'",
+      "status": "PASS"
+    },
+    {
+      "id": "H-07",
+      "phase": 7,
+      "kind": "orchestrator",
+      "description": "[repair] model echo -> changed=False, empty diff",
+      "input": "stub returns section unchanged",
+      "expected": "changed=False, diff ''",
+      "actual": "changed=False, diff ''",
+      "status": "PASS"
     }
   ]
 }

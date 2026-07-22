@@ -19,10 +19,10 @@
     "real_llm": "OpenAI-compatible NVIDIA endpoint wired via .env (DOCGUARD_OPENAI_BASE_URL, model deepseek-ai/deepseek-v4-flash). Works; slow ~30-70s/call."
   },
   "open_followups": [
-    "HARDEN real-LLM repair path: it detects staleness correctly but returned no applied change on long prose sections (JSON {repaired} contract not honored). Improve prompt/parse/validation in src/docguard/providers/real.py _JsonLLM.repair_section.",
-    "IMPROVE code->doc mapping precision: word-match over-links (a symbol mentioned in a tutorial != documented). Affects real-repo recall measurement.",
-    "OPTIONAL: faster LLM endpoint for CI; real GitHub Action E2E on a live repo (BLK-GH)."
+    "DONE (offline) session-3: real-LLM repair now feeds the NEW code + stale_claims + scope into the repair prompt (root cause: model never saw what to repair toward, so it echoed), adds ASD-STE100 style constraints for minimal diffs, salvages malformed JSON, and fills unified_diff. Contract covered by H-04..H-07. STILL TO CONFIRM: one live DeepSeek run to verify the endpoint now returns an applied change (needs .env key, ~30-70s/call).",
+    "DONE (offline) session-3: code->doc mapping precision. _exact now requires a documentation signal (symbol in heading, repeated, defined/called, or short focused blurb) instead of any lone inline mention -> kills tutorial over-linking. Knob: _SHORT_SECTION in mapper.py. Covered by H-01..H-03.",
+    "OPTIONAL: faster LLM endpoint for CI; real GitHub Action E2E on a live repo (BLK-GH); re-run scripts/eval_realrepo.py to measure the precision gain on pydantic/fastapi."
   ],
-  "next_action": "Optional hardening: (1) fix real-LLM repair generation, (2) improve mapping precision. Core system COMPLETE and committed. Real-LLM key is in gitignored .env (survives /clear).",
-  "updated": "build-session-2"
+  "next_action": "Confirm real-LLM repair end-to-end with one live DeepSeek run (DOCGUARD_LLM_PROVIDER=openai, key in .env), then re-run eval_realrepo.py to quantify the mapping-precision gain. Core + offline hardening COMPLETE; 96 tests green, ruff+mypy clean.",
+  "updated": "build-session-3"
 }
