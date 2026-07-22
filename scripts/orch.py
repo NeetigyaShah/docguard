@@ -29,9 +29,13 @@ def log(actor: str, feature: str, action: str, result: str, commit: str = "") ->
 
 
 def add_tests(records: list[dict]) -> None:
+    """Upsert by test id so reruns replace prior results instead of duplicating."""
     path = ORCH / "tests.json"
     data = json.loads(path.read_text(encoding="utf-8")) if path.exists() else {"records": []}
-    data["records"].extend(records)
+    by_id = {r["id"]: r for r in data["records"]}
+    for r in records:
+        by_id[r["id"]] = r
+    data["records"] = sorted(by_id.values(), key=lambda r: (r.get("phase", 0), r["id"]))
     path.write_text(json.dumps(data, indent=2), encoding="utf-8")
 
 
