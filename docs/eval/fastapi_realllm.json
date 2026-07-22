@@ -1,0 +1,38 @@
+{
+  "repo": "D:\\_docguard_eval\\fastapi",
+  "targets_tested": 3,
+  "tp": 0,
+  "fp": 0,
+  "fn": 3,
+  "negative_controls": 3,
+  "false_positives_on_negatives": 0,
+  "precision": 1.0,
+  "recall": 0.0,
+  "f1": 0.0,
+  "samples": [
+    {
+      "symbol": "field_annotation_is_sequence",
+      "param": "annotation",
+      "doc": "docs/en/docs/tutorial/response-model.md",
+      "flagged_stale": false,
+      "repair_generated": false,
+      "repair_preview": null
+    },
+    {
+      "symbol": "value_is_sequence",
+      "param": "value",
+      "doc": "docs/en/docs/tutorial/path-params.md",
+      "flagged_stale": false,
+      "repair_generated": false,
+      "repair_preview": null
+    },
+    {
+      "symbol": "field_annotation_is_complex",
+      "param": "annotation",
+      "doc": "docs/en/docs/tutorial/response-model.md",
+      "flagged_stale": false,
+      "repair_generated": false,
+      "repair_preview": null
+    }
+  ]
+}

@@ -31,6 +31,17 @@ The **repository is the source of truth**, not any conversation. To resume:
 ```
 (POSIX: use `.venv/bin/python`.)
 
+## Real-LLM + real-world evaluation (session 2)
+- Real LLM is wired via an **OpenAI-compatible endpoint** (`DOCGUARD_OPENAI_BASE_URL`).
+  The key + config live in gitignored **`.env`** (survives `/clear`; never committed).
+  Switch on with `DOCGUARD_LLM_PROVIDER=openai`. Tests stay `mock` by default.
+- Evaluated on real Pydantic + FastAPI clones: evidence in `docs/eval/*.json` and
+  README "Real-world evaluation". Reproduce: `python scripts/real_case_demo.py`,
+  `python scripts/eval_realrepo.py --repo <path> --src <dir> --docs <dir>`.
+- **Open follow-ups** (see `.orchestrator/state.json.open_followups`): (1) harden the
+  real-LLM repair path (detects well, but returned no change on long prose), (2)
+  improve code→doc mapping precision (word-match over-links).
+
 ## Rules that persist
 - Offline mock providers are the default; real OpenAI/Anthropic/GitHub are opt-in
   behind interfaces. Never commit secrets.

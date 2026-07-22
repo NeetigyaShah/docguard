@@ -1,0 +1,134 @@
+{
+  "repo": "D:\\_docguard_eval\\pydantic",
+  "targets_tested": 15,
+  "tp": 3,
+  "fp": 0,
+  "fn": 12,
+  "negative_controls": 5,
+  "false_positives_on_negatives": 0,
+  "precision": 1.0,
+  "recall": 0.2,
+  "f1": 0.333,
+  "samples": [
+    {
+      "symbol": "ConfigWrapper.core_config",
+      "param": "title",
+      "doc": "docs/migration.md",
+      "flagged_stale": false,
+      "repair_generated": false,
+      "repair_preview": null
+    },
+    {
+      "symbol": "prepare_config",
+      "param": "config",
+      "doc": "docs/migration.md",
+      "flagged_stale": false,
+      "repair_generated": false,
+      "repair_preview": null
+    },
+    {
+      "symbol": "is_core_schema",
+      "param": "schema",
+      "doc": "docs/concepts/fields.md",
+      "flagged_stale": false,
+      "repair_generated": false,
+      "repair_preview": null
+    },
+    {
+      "symbol": "is_core_schema_field",
+      "param": "schema",
+      "doc": "docs/concepts/fields.md",
+      "flagged_stale": false,
+      "repair_generated": false,
+      "repair_preview": null
+    },
+    {
+      "symbol": "is_function_with_inner_schema",
+      "param": "schema",
+      "doc": "docs/concepts/fields.md",
+      "flagged_stale": false,
+      "repair_generated": false,
+      "repair_preview": null
+    },
+    {
+      "symbol": "is_list_like_schema_with_items_schema",
+      "param": "schema",
+      "doc": "docs/concepts/fields.md",
+      "flagged_stale": false,
+      "repair_generated": false,
+      "repair_preview": null
+    },
+    {
+      "symbol": "get_ref",
+      "param": "s",
+      "doc": "docs/integrations/visual_studio_code.md",
+      "flagged_stale": false,
+      "repair_generated": false,
+      "repair_preview": null
+    },
+    {
+      "symbol": "pretty_print_core_schema",
+      "param": "val",
+      "doc": "docs/examples/orms.md",
+      "flagged_stale": false,
+      "repair_generated": false,
+      "repair_preview": null
+    },
+    {
+      "symbol": "inspect_validator",
+      "param": "validator",
+      "doc": "docs/migration.md",
+      "flagged_stale": false,
+      "repair_generated": false,
+      "repair_preview": null
+    },
+    {
+      "symbol": "inspect_field_serializer",
+      "param": "serializer",
+      "doc": "docs/concepts/serialization.md",
+      "flagged_stale": true,
+      "repair_generated": false,
+      "repair_preview": null
+    },
+    {
+      "symbol": "inspect_annotated_serializer",
+      "param": "serializer",
+      "doc": "docs/concepts/serialization.md",
+      "flagged_stale": true,
+      "repair_generated": false,
+      "repair_preview": null
+    },
+    {
+      "symbol": "inspect_model_serializer",
+      "param": "serializer",
+      "doc": "docs/concepts/serialization.md",
+      "flagged_stale": true,
+      "repair_generated": false,
+      "repair_preview": null
+    },
+    {
+      "symbol": "is_instance_method_from_sig",
+      "param": "function",
+      "doc": "docs/concepts/validation_decorator.md",
+      "flagged_stale": false,
+      "repair_generated": false,
+      "repair_preview": null
+    },
+    {
+      "symbol": "ensure_classmethod_based_on_signature",
+      "param": "function",
+      "doc": "docs/concepts/validators.md",
+      "flagged_stale": false,
+      "repair_generated": false,
+      "repair_preview": null
+    },
+    {
+      "symbol": "unwrap_wrapped_function",
+      "param": "func",
+      "doc": "docs/internals/resolving_annotations.md",
+      "flagged_stale": false,
+      "repair_generated": false,
+      "repair_preview": null
+    }
+  ]
+}

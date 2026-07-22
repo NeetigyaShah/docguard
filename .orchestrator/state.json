@@ -2,7 +2,7 @@
   "project": "DocGuard — Self-Healing Technical Documentation",
   "root": "D:/self-healing-docs",
   "current_phase": 6,
-  "active_milestone": "COMPLETE",
+  "active_milestone": "COMPLETE (+ real-world evaluation done)",
   "completion_pct": 95,
   "features_total": 22,
   "features_passed": 21,
@@ -12,6 +12,17 @@
   "features_planned": 0,
   "integration_branch": "integration",
   "phases_passed": [0, 1, 2, 3, 4, 5, 6],
-  "next_action": "All 6 phases + backbone PASSED. Only F004 (real LLM providers) PARTIAL — needs an API key for live validation (BLK-LLM). Optional: real GitHub E2E (BLK-GH).",
-  "updated": "build-session"
+  "real_world_eval": {
+    "repos": ["pydantic", "fastapi"],
+    "evidence": "docs/eval/*.json + README 'Real-world evaluation'",
+    "findings": "Zero false positives on real repos. Mock = high-precision structural baseline, LOW recall. Hand-verified Pydantic Field(frozen=) rename: mock flags stale + surgical fix; real DeepSeek LLM flags stale (correct reasoning) but repair returned no change.",
+    "real_llm": "OpenAI-compatible NVIDIA endpoint wired via .env (DOCGUARD_OPENAI_BASE_URL, model deepseek-ai/deepseek-v4-flash). Works; slow ~30-70s/call."
+  },
+  "open_followups": [
+    "HARDEN real-LLM repair path: it detects staleness correctly but returned no applied change on long prose sections (JSON {repaired} contract not honored). Improve prompt/parse/validation in src/docguard/providers/real.py _JsonLLM.repair_section.",
+    "IMPROVE code->doc mapping precision: word-match over-links (a symbol mentioned in a tutorial != documented). Affects real-repo recall measurement.",
+    "OPTIONAL: faster LLM endpoint for CI; real GitHub Action E2E on a live repo (BLK-GH)."
+  ],
+  "next_action": "Optional hardening: (1) fix real-LLM repair generation, (2) improve mapping precision. Core system COMPLETE and committed. Real-LLM key is in gitignored .env (survives /clear).",
+  "updated": "build-session-2"
 }

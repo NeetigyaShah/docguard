@@ -1,0 +1,134 @@
+{
+  "repo": "D:\\_docguard_eval\\fastapi",
+  "targets_tested": 15,
+  "tp": 0,
+  "fp": 0,
+  "fn": 15,
+  "negative_controls": 5,
+  "false_positives_on_negatives": 0,
+  "precision": 1.0,
+  "recall": 0.0,
+  "f1": 0.0,
+  "samples": [
+    {
+      "symbol": "field_annotation_is_sequence",
+      "param": "annotation",
+      "doc": "docs/en/docs/tutorial/response-model.md",
+      "flagged_stale": false,
+      "repair_generated": false,
+      "repair_preview": null
+    },
+    {
+      "symbol": "value_is_sequence",
+      "param": "value",
+      "doc": "docs/en/docs/tutorial/path-params.md",
+      "flagged_stale": false,
+      "repair_generated": false,
+      "repair_preview": null
+    },
+    {
+      "symbol": "field_annotation_is_complex",
+      "param": "annotation",
+      "doc": "docs/en/docs/tutorial/response-model.md",
+      "flagged_stale": false,
+      "repair_generated": false,
+      "repair_preview": null
+    },
+    {
+      "symbol": "field_annotation_is_scalar",
+      "param": "annotation",
+      "doc": "docs/en/docs/advanced/stream-data.md",
+      "flagged_stale": false,
+      "repair_generated": false,
+      "repair_preview": null
+    },
+    {
+      "symbol": "field_annotation_is_scalar_sequence",
+      "param": "annotation",
+      "doc": "docs/en/docs/tutorial/extra-models.md",
+      "flagged_stale": false,
+      "repair_generated": false,
+      "repair_preview": null
+    },
+    {
+      "symbol": "is_bytes_or_nonable_bytes_annotation",
+      "param": "annotation",
+      "doc": "docs/en/docs/advanced/stream-data.md",
+      "flagged_stale": false,
+      "repair_generated": false,
+      "repair_preview": null
+    },
+    {
+      "symbol": "is_uploadfile_or_nonable_uploadfile_annotation",
+      "param": "annotation",
+      "doc": "docs/en/docs/advanced/stream-data.md",
+      "flagged_stale": false,
+      "repair_generated": false,
+      "repair_preview": null
+    },
+    {
+      "symbol": "is_bytes_sequence_annotation",
+      "param": "annotation",
+      "doc": "docs/en/docs/advanced/stream-data.md",
+      "flagged_stale": false,
+      "repair_generated": false,
+      "repair_preview": null
+    },
+    {
+      "symbol": "is_uploadfile_sequence_annotation",
+      "param": "annotation",
+      "doc": "docs/en/docs/advanced/stream-data.md",
+      "flagged_stale": false,
+      "repair_generated": false,
+      "repair_preview": null
+    },
+    {
+      "symbol": "annotation_is_pydantic_v1",
+      "param": "annotation",
+      "doc": "docs/en/docs/advanced/stream-data.md",
+      "flagged_stale": false,
+      "repair_generated": false,
+      "repair_preview": null
+    },
+    {
+      "symbol": "ModelField.serialize",
+      "param": "value",
+      "doc": "docs/en/docs/release-notes.md",
+      "flagged_stale": false,
+      "repair_generated": false,
+      "repair_preview": null
+    },
+    {
+      "symbol": "create_body_model",
+      "param": "fields",
+      "doc": "docs/en/docs/tutorial/request-form-models.md",
+      "flagged_stale": false,
+      "repair_generated": false,
+      "repair_preview": null
+    },
+    {
+      "symbol": "get_cached_model_fields",
+      "param": "model",
+      "doc": "docs/en/docs/how-to/migrate-from-pydantic-v1-to-pydantic-v2.md",
+      "flagged_stale": false,
+      "repair_generated": false,
+      "repair_preview": null
+    },
+    {
+      "symbol": "FastAPI.add_api_route",
+      "param": "path",
+      "doc": "docs/en/docs/release-notes.md",
+      "flagged_stale": false,
+      "repair_generated": false,
+      "repair_preview": null
+    },
+    {
+      "symbol": "FastAPI.frontend",
+      "param": "path",
+      "doc": "docs/en/docs/tutorial/frontend.md",
+      "flagged_stale": false,
+      "repair_generated": false,
+      "repair_preview": null
+    }
+  ]
+}
