@@ -102,11 +102,12 @@ def _renames(old: str, new: str) -> list[tuple[str, str]]:
 def _default_changes(old: str, new: str) -> list[tuple[str, str, str]]:
     od = dict(parse_params(old))
     nd = dict(parse_params(new))
-    out = []
+    out: list[tuple[str, str, str]] = []
     # same-name default changes
     for name, newdef in nd.items():
-        if name in od and od[name] is not None and newdef is not None and od[name] != newdef:
-            out.append((name, od[name], newdef))
+        ov = od.get(name)
+        if ov is not None and newdef is not None and ov != newdef:
+            out.append((name, ov, newdef))
     # default changes that ride along with a rename (old_name -> new_name)
     for old_name, new_name in _renames(old, new):
         ov, nv = od.get(old_name), nd.get(new_name)
@@ -141,13 +142,13 @@ class MockLLMProvider(LLMProvider):
         self, *, impact: ChangeImpact, code_unit: CodeUnit, section: DocSection
     ) -> StalenessVerdict:
         self.calls += 1
-        vid = dict(doc_section_id=section.id, code_unit_id=code_unit.id)
         content = section.content
 
         # 1) nothing publicly meaningful changed -> accurate
         if not impact.meaningful or not impact.is_high_significance:
             return StalenessVerdict(
-                **vid,
+                doc_section_id=section.id,
+                code_unit_id=code_unit.id,
                 label=StalenessLabel.ACCURATE,
                 confidence=0.9,
                 reason="Change is internal/low-significance; public behavior unchanged.",
@@ -163,7 +164,8 @@ class MockLLMProvider(LLMProvider):
         ):
             if related:
                 return StalenessVerdict(
-                    **vid,
+                    doc_section_id=section.id,
+                    code_unit_id=code_unit.id,
                     label=StalenessLabel.STALE,
                     confidence=0.8,
                     reason=f"`{code_unit.name}` was removed but documentation still describes it.",
@@ -172,14 +174,16 @@ class MockLLMProvider(LLMProvider):
                     risk=RiskLevel.HIGH,
                 )
             return StalenessVerdict(
-                **vid, label=StalenessLabel.UNRELATED, confidence=0.8,
+                doc_section_id=section.id, code_unit_id=code_unit.id,
+                label=StalenessLabel.UNRELATED, confidence=0.8,
                 reason="Removed symbol is not referenced by this section.",
             )
 
         # 3) unrelated to this section
         if not related:
             return StalenessVerdict(
-                **vid,
+                doc_section_id=section.id,
+                code_unit_id=code_unit.id,
                 label=StalenessLabel.UNRELATED,
                 confidence=0.8,
                 reason="Section does not reference the changed code unit.",
@@ -189,7 +193,8 @@ class MockLLMProvider(LLMProvider):
         for old_name, new_name in _renames(impact.old_source, impact.new_source):
             if _word_in(content, old_name):
                 return StalenessVerdict(
-                    **vid,
+                    doc_section_id=section.id,
+                    code_unit_id=code_unit.id,
                     label=StalenessLabel.STALE,
                     confidence=0.92,
                     reason=f"Parameter `{old_name}` was renamed to `{new_name}`; docs still say `{old_name}`.",
@@ -203,7 +208,8 @@ class MockLLMProvider(LLMProvider):
             uq = _unquote(old_def)
             if uq and _word_in(content, uq):
                 return StalenessVerdict(
-                    **vid,
+                    doc_section_id=section.id,
+                    code_unit_id=code_unit.id,
                     label=StalenessLabel.STALE,
                     confidence=0.88,
                     reason=f"Default for `{name}` changed {old_def} -> {new_def}; docs still say {old_def}.",
@@ -216,7 +222,8 @@ class MockLLMProvider(LLMProvider):
         for old_name, _new in [(o, None) for o in _params_removed(impact)]:
             if _word_in(content, old_name):
                 return StalenessVerdict(
-                    **vid,
+                    doc_section_id=section.id,
+                    code_unit_id=code_unit.id,
                     label=StalenessLabel.STALE,
                     confidence=0.85,
                     reason=f"Parameter `{old_name}` was removed but is still documented.",
@@ -227,7 +234,8 @@ class MockLLMProvider(LLMProvider):
 
         # 7) related + meaningful but no concrete stale token found -> accurate (avoid FP)
         return StalenessVerdict(
-            **vid,
+            doc_section_id=section.id,
+            code_unit_id=code_unit.id,
             label=StalenessLabel.ACCURATE,
             confidence=0.6,
             reason="Related change, but no specific stale claim detected in the section text.",

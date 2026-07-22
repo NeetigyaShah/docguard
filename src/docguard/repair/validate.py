@@ -17,7 +17,8 @@ _MARKER = re.compile(r"^\s*([#>\-*+]|\d+\.)\s?")
 
 
 def _leading(line: str) -> str:
-    return _LEADING.match(line).group()
+    m = _LEADING.match(line)
+    return m.group() if m else ""
 
 
 def _marker(line: str) -> str:

@@ -34,7 +34,7 @@ def _endpoint_path(node: ast.FunctionDef | ast.AsyncFunctionDef) -> str | None:
         if isinstance(dec, ast.Call) and isinstance(dec.func, ast.Attribute):
             if dec.func.attr in _ROUTE_ATTRS:
                 if dec.args and isinstance(dec.args[0], ast.Constant):
-                    return f"{dec.func.attr.upper()} {dec.args[0].value}"
+                    return f"{dec.func.attr.upper()} {dec.args[0].value!s}"
     return None
 
 

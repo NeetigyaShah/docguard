@@ -25,7 +25,7 @@ def build_comment(result: PipelineResult) -> str:
                 Action.AUTO_FIX: "🟢 auto-fix",
                 Action.HUMAN_REVIEW: "🟡 review",
                 Action.REPORT: "🔴 report",
-            }.get(r.action, "•")
+            }.get(r.action or Action.REPORT, "•")
             path = r.section.doc_path
             crumb = " / ".join(r.section.heading_path)
             lines.append(f"- `{path}` → **{crumb}** — {r.verdict.reason} _[{tag}]_")
