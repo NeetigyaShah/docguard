@@ -15,7 +15,7 @@ from docguard.confidence.policy import decide
 from docguard.config import Settings, load_settings
 from docguard.mapping.mapper import build_links
 from docguard.models import Action, PipelineResult, StalenessLabel
-from docguard.parsers.code_python import parse_python_file, parse_python_source
+from docguard.parsers.code import parse_code_file, parse_code_source
 from docguard.parsers.docs_markdown import parse_markdown_file
 from docguard.parsers.repo_walker import find_code, find_docs
 from docguard.providers.factory import get_embedding_provider, get_llm_provider
@@ -30,7 +30,7 @@ def analyze(
     settings = settings or load_settings()
     repo_path = Path(repo)
 
-    head_units = [u for f in find_code(repo, settings.src_path_list()) for u in parse_python_file(f, repo)]
+    head_units = [u for f in find_code(repo, settings.src_path_list()) for u in parse_code_file(f, repo)]
     sections = [s for f in find_docs(repo, settings.docs_path_list()) for s in parse_markdown_file(f, repo)]
 
     impacts = detect_changes(repo, base, head, settings.src_path_list())
@@ -41,7 +41,7 @@ def analyze(
         if imp.code_unit_id:
             impact_by_unit[imp.code_unit_id] = imp
             if imp.code_unit_id not in by_id:  # removed unit → reconstruct from base
-                for u in parse_python_source(file_at(repo, base, imp.file), imp.file):
+                for u in parse_code_source(file_at(repo, base, imp.file), imp.file):
                     if u.id == imp.code_unit_id:
                         by_id[u.id] = u
                         extra.append(u)

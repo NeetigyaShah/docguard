@@ -4,6 +4,8 @@ from __future__ import annotations
 
 from pathlib import Path
 
+from docguard.parsers.code import CODE_EXTENSIONS
+
 _SKIP_DIRS = {
     ".git", ".venv", "venv", "node_modules", "__pycache__", "dist", "build",
     ".pytest_cache", ".ruff_cache", ".mypy_cache",
@@ -28,9 +30,9 @@ def _iter_files(root: Path, subdirs: list[str], exts: set[str]) -> list[str]:
 
 def find_code(root: str | Path, src_paths: list[str] | None = None) -> list[str]:
     root = Path(root)
-    return _iter_files(root, src_paths or ["src"], {".py"})
+    return _iter_files(root, src_paths or ["src"], CODE_EXTENSIONS)
 
 
 def find_docs(root: str | Path, docs_paths: list[str] | None = None) -> list[str]:
     root = Path(root)
-    return _iter_files(root, docs_paths or ["docs"], {".md", ".markdown"})
+    return _iter_files(root, docs_paths or ["docs"], {".md", ".markdown", ".mdx"})

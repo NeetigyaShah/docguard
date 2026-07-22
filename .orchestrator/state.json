@@ -2,8 +2,21 @@
   "project": "DocGuard — Self-Healing Technical Documentation",
   "root": "D:/self-healing-docs",
   "current_phase": 6,
-  "active_milestone": "COMPLETE (+ real-world evaluation done)",
-  "completion_pct": 95,
+  "active_milestone": "COMPLETE (+ real-world eval + universal multi-language parser)",
+  "completion_pct": 97,
+  "multi_language": {
+    "status": "DONE session-4 (2026-07-23)",
+    "languages": ["python (stdlib ast)", "typescript/tsx", "javascript/jsx/mjs/cjs", "java"],
+    "engine": "tree-sitter + tree-sitter-language-pack (core deps; prebuilt wheels, no compiler)",
+    "design": "All code parsing routes through parsers/code.py:parse_code_source (ext dispatch). Change detection is language-agnostic via structured CodeUnit.params (models.Param) — classify.py + mock.py read impact.old_params/new_params, no per-language regex. Router degrades to [] on missing grammar / bad file (CI-safe). Same detect->map->verify->repair->PR flow; nothing forked.",
+    "evidence": "106 tests pass (was 96): +tests/unit/test_parse_{typescript,javascript,java}.py + tests/unit/test_multilang_e2e.py (analyze() heals a real TS repo + flags a Java rename end-to-end). ruff+mypy clean (38 files). Adversarial workflow (6 agents) found+fixed real extraction bugs: TS parenless arrow, JS generators, Java enum methods.",
+    "deploy_verified": "GitHub Action Docker image builds (python:3.11-slim, exit 0, 107MB) with tree-sitter in core deps; container CLI runs and grammars load+parse TS/Java inside the image. action.yml/entrypoint unchanged.",
+    "known_limitations": [
+      "getter/setter with same name collide on (qualified_name, kind) — one overwrites the other (info loss, no false positive).",
+      "overloaded Java methods collide on the same key; constructors + nested-class methods + @interface not extracted (deliberate).",
+      "TS class-field arrow properties (handler = (e) => ...) and destructured params are skipped."
+    ]
+  },
   "features_total": 22,
   "features_passed": 21,
   "features_in_progress": 0,

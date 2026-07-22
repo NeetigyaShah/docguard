@@ -11,7 +11,7 @@ from __future__ import annotations
 import ast
 from pathlib import Path
 
-from docguard.models import CodeUnit, CodeUnitKind
+from docguard.models import CodeUnit, CodeUnitKind, Param
 
 _ROUTE_ATTRS = {"get", "post", "put", "delete", "patch", "route"}
 
@@ -23,10 +23,32 @@ def _sig(node: ast.FunctionDef | ast.AsyncFunctionDef) -> str:
         return "()"
 
 
-def _param_names(node: ast.FunctionDef | ast.AsyncFunctionDef) -> list[str]:
+def _unparse(node: ast.AST | None) -> str | None:
+    if node is None:
+        return None
+    try:
+        return ast.unparse(node)
+    except Exception:  # pragma: no cover
+        return None
+
+
+def _params(node: ast.FunctionDef | ast.AsyncFunctionDef) -> list[Param]:
     a = node.args
-    names = [p.arg for p in (a.posonlyargs + a.args + a.kwonlyargs)]
-    return [n for n in names if n not in ("self", "cls")]
+    pos = a.posonlyargs + a.args
+    # defaults align to the TAIL of the positional args
+    pos_defaults: list[ast.AST | None] = [None] * (len(pos) - len(a.defaults)) + list(a.defaults)
+    out: list[Param] = []
+    for p, d in zip(pos, pos_defaults):
+        if p.arg not in ("self", "cls"):
+            out.append(Param(name=p.arg, default=_unparse(d)))
+    for p, d in zip(a.kwonlyargs, a.kw_defaults):
+        if p.arg not in ("self", "cls"):
+            out.append(Param(name=p.arg, default=_unparse(d)))
+    return out
+
+
+def _param_names(node: ast.FunctionDef | ast.AsyncFunctionDef) -> list[str]:
+    return [p.name for p in _params(node)]
 
 
 def _endpoint_path(node: ast.FunctionDef | ast.AsyncFunctionDef) -> str | None:
@@ -47,15 +69,17 @@ def parse_python_source(source: str, file_path: str) -> list[CodeUnit]:
 
     def make(node, name, qual, kind, extra_symbols=()):
         seg = ast.get_source_segment(source, node) or ""
-        sig = _sig(node) if isinstance(node, (ast.FunctionDef, ast.AsyncFunctionDef)) else ""
-        params = _param_names(node) if isinstance(node, (ast.FunctionDef, ast.AsyncFunctionDef)) else []
+        is_func = isinstance(node, (ast.FunctionDef, ast.AsyncFunctionDef))
+        sig = _sig(node) if is_func else ""
+        param_objs = _params(node) if is_func else []
+        names = [p.name for p in param_objs]
         return CodeUnit(
             id=CodeUnit.make_id(file_path, qual, kind),
             kind=kind, name=name, qualified_name=qual, signature=sig,
             docstring=ast.get_docstring(node) or "" if isinstance(
                 node, (ast.FunctionDef, ast.AsyncFunctionDef, ast.ClassDef)) else "",
             file=file_path, start_line=node.lineno, end_line=getattr(node, "end_lineno", node.lineno),
-            source=seg, symbols=sorted({name, *params, *extra_symbols}),
+            source=seg, symbols=sorted({name, *names, *extra_symbols}), params=param_objs,
         )
 
     for node in tree.body:

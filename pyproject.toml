@@ -10,6 +10,10 @@ requires-python = ">=3.11"
 dependencies = [
     "pydantic>=2.6",
     "pydantic-settings>=2.2",
+    # Universal multi-language code parsing (Python via stdlib ast; TS/JS/Java via
+    # tree-sitter grammars). Prebuilt wheels — no compiler needed in the CI image.
+    "tree-sitter>=0.21",
+    "tree-sitter-language-pack>=0.9",
 ]
 
 [project.optional-dependencies]

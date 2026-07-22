@@ -18,6 +18,7 @@ from docguard.models import (
     ChangeKind,
     CodeUnit,
     DocSection,
+    Param,
     Repair,
     RiskLevel,
     StalenessLabel,
@@ -91,17 +92,25 @@ def parse_params(source: str) -> list[tuple[str, str | None]]:
     return out
 
 
-def _renames(old: str, new: str) -> list[tuple[str, str]]:
-    o = [n for n, _ in parse_params(old)]
-    n = [n for n, _ in parse_params(new)]
+def _impact_params(impact: ChangeImpact) -> tuple[list[Param], list[Param]]:
+    """Prefer structured params (any language); fall back to parsing the Python
+    source so hand-built impacts (without params) still work."""
+    old = impact.old_params or [Param(name=n, default=d) for n, d in parse_params(impact.old_source)]
+    new = impact.new_params or [Param(name=n, default=d) for n, d in parse_params(impact.new_source)]
+    return old, new
+
+
+def _renames(old: list[Param], new: list[Param]) -> list[tuple[str, str]]:
+    o = [p.name for p in old]
+    n = [p.name for p in new]
     removed = [x for x in o if x not in n]
     added = [x for x in n if x not in o]
     return list(zip(removed, added))  # positional pairing
 
 
-def _default_changes(old: str, new: str) -> list[tuple[str, str, str]]:
-    od = dict(parse_params(old))
-    nd = dict(parse_params(new))
+def _default_changes(old: list[Param], new: list[Param]) -> list[tuple[str, str, str]]:
+    od = {p.name: p.default for p in old}
+    nd = {p.name: p.default for p in new}
     out: list[tuple[str, str, str]] = []
     # same-name default changes
     for name, newdef in nd.items():
@@ -143,6 +152,7 @@ class MockLLMProvider(LLMProvider):
     ) -> StalenessVerdict:
         self.calls += 1
         content = section.content
+        old_p, new_p = _impact_params(impact)
 
         # 1) nothing publicly meaningful changed -> accurate
         if not impact.meaningful or not impact.is_high_significance:
@@ -190,7 +200,7 @@ class MockLLMProvider(LLMProvider):
             )
 
         # 4) renamed parameter whose OLD name appears in the docs
-        for old_name, new_name in _renames(impact.old_source, impact.new_source):
+        for old_name, new_name in _renames(old_p, new_p):
             if _word_in(content, old_name):
                 return StalenessVerdict(
                     doc_section_id=section.id,
@@ -204,7 +214,7 @@ class MockLLMProvider(LLMProvider):
                 )
 
         # 5) changed default whose OLD value is documented
-        for name, old_def, new_def in _default_changes(impact.old_source, impact.new_source):
+        for name, old_def, new_def in _default_changes(old_p, new_p):
             uq = _unquote(old_def)
             if uq and _word_in(content, uq):
                 return StalenessVerdict(
@@ -219,7 +229,7 @@ class MockLLMProvider(LLMProvider):
                 )
 
         # 6) removed parameter still documented
-        for old_name, _new in [(o, None) for o in _params_removed(impact)]:
+        for old_name, _new in [(o, None) for o in _params_removed(old_p, new_p)]:
             if _word_in(content, old_name):
                 return StalenessVerdict(
                     doc_section_id=section.id,
@@ -253,13 +263,14 @@ class MockLLMProvider(LLMProvider):
         self.calls += 1
         original = section.content
         repaired = original
+        old_p, new_p = _impact_params(impact)
 
         # targeted swaps only — everything else stays byte-identical.
         # Param renames: only inside `backticks` (a bare word like "role" in prose
         # may name an unrelated field); default values: whole-word (values are specific).
-        for old_name, new_name in _renames(impact.old_source, impact.new_source):
+        for old_name, new_name in _renames(old_p, new_p):
             repaired = re.sub(rf"`{re.escape(old_name)}`", f"`{new_name}`", repaired)
-        for _name, old_def, new_def in _default_changes(impact.old_source, impact.new_source):
+        for _name, old_def, new_def in _default_changes(old_p, new_p):
             uq_old, uq_new = _unquote(old_def), _unquote(new_def)
             if uq_old:
                 repaired = re.sub(rf"\b{re.escape(uq_old)}\b", uq_new, repaired)
@@ -285,9 +296,9 @@ class MockLLMProvider(LLMProvider):
         )
 
 
-def _params_removed(impact: ChangeImpact) -> list[str]:
-    o = [n for n, _ in parse_params(impact.old_source)]
-    n = [n for n, _ in parse_params(impact.new_source)]
+def _params_removed(old: list[Param], new: list[Param]) -> list[str]:
+    o = [p.name for p in old]
+    n = [p.name for p in new]
     # a rename consumes one removed+one added; only report pure removals
-    renamed_old = {r for r, _ in _renames(impact.old_source, impact.new_source)}
+    renamed_old = {r for r, _ in _renames(old, new)}
     return [x for x in o if x not in n and x not in renamed_old]

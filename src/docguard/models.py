@@ -30,6 +30,19 @@ class CodeUnitKind(str, Enum):
     ENDPOINT = "endpoint"
 
 
+class Param(BaseModel):
+    """A single function/method parameter, normalized across languages.
+
+    Each language parser fills this from a real grammar, so change detection
+    (rename / default-change / add / remove) is language-agnostic and never
+    re-parses source with per-language regex. `default` is the literal text of
+    the default value, or None when the language/param has none (e.g. Java).
+    """
+
+    name: str
+    default: str | None = None
+
+
 class CodeUnit(BaseModel):
     """A semantic unit of source code with a stable id."""
 
@@ -44,6 +57,7 @@ class CodeUnit(BaseModel):
     end_line: int
     source: str = ""
     symbols: list[str] = Field(default_factory=list)
+    params: list[Param] = Field(default_factory=list)
 
     @staticmethod
     def make_id(file: str, qualified_name: str, kind: CodeUnitKind) -> str:
@@ -134,6 +148,8 @@ class ChangeImpact(BaseModel):
     kind: CodeUnitKind | None = None
     old_source: str = ""
     new_source: str = ""
+    old_params: list[Param] = Field(default_factory=list)
+    new_params: list[Param] = Field(default_factory=list)
     change_kinds: list[ChangeKind] = Field(default_factory=list)
     meaningful: bool = False
     significance: float = 0.0  # 0..1

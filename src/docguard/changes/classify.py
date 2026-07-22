@@ -13,9 +13,8 @@ import io
 import tokenize
 
 from docguard.changes.diff import changed_files, file_at
-from docguard.models import ChangeImpact, ChangeKind, CodeUnit, CodeUnitKind
-from docguard.parsers.code_python import parse_python_source
-from docguard.providers.mock import parse_params
+from docguard.models import ChangeImpact, ChangeKind, CodeUnit, CodeUnitKind, Param
+from docguard.parsers.code import CODE_EXTENSIONS, parse_code_source
 
 
 def _comments(src: str) -> list[str]:
@@ -41,9 +40,9 @@ def _is_public(name: str) -> bool:
     return not name.split(".")[-1].split(":")[-1].startswith("_")
 
 
-def _sig_kinds(old_src: str, new_src: str) -> list[ChangeKind]:
-    old = dict(parse_params(old_src))
-    new = dict(parse_params(new_src))
+def _sig_kinds(old_params: list[Param], new_params: list[Param]) -> list[ChangeKind]:
+    old = {p.name: p.default for p in old_params}
+    new = {p.name: p.default for p in new_params}
     o, n = list(old), list(new)
     removed = [x for x in o if x not in n]
     added = [x for x in n if x not in o]
@@ -81,6 +80,8 @@ def classify_change(
     assert unit is not None
     old_src = old_unit.source if old_unit else ""
     new_src = new_unit.source if new_unit else ""
+    old_params = old_unit.params if old_unit else []
+    new_params = new_unit.params if new_unit else []
     kinds: list[ChangeKind] = []
 
     _structural = {
@@ -114,7 +115,7 @@ def classify_change(
         elif _same_ast(old_src, new_src):
             kinds = [ChangeKind.COMMENT] if _comments(old_src) != _comments(new_src) else [ChangeKind.WHITESPACE]
         else:
-            sig = _sig_kinds(old_src, new_src)
+            sig = _sig_kinds(old_params, new_params)
             if sig:
                 kinds = [*sig, ChangeKind.SIGNATURE_CHANGE]
                 if unit.kind == CodeUnitKind.ENDPOINT:
@@ -131,14 +132,15 @@ def classify_change(
     meaningful = any(k in HIGH_SIGNIFICANCE for k in kinds)
     return ChangeImpact(
         file=unit.file, code_unit_id=unit.id, unit_name=unit.name, kind=unit.kind,
-        old_source=old_src, new_source=new_src, change_kinds=kinds,
+        old_source=old_src, new_source=new_src,
+        old_params=old_params, new_params=new_params, change_kinds=kinds,
         meaningful=meaningful, significance=_significance(kinds),
         summary=f"{unit.qualified_name}: {', '.join(k.value for k in kinds)}",
     )
 
 
 def _units_by_key(source: str, path: str) -> dict[tuple[str, CodeUnitKind], CodeUnit]:
-    return {(u.qualified_name, u.kind): u for u in parse_python_source(source, path)}
+    return {(u.qualified_name, u.kind): u for u in parse_code_source(source, path)}
 
 
 def detect_changes(
@@ -148,7 +150,8 @@ def detect_changes(
     src_paths = src_paths or ["src"]
     impacts: list[ChangeImpact] = []
     for status, path in changed_files(repo, base, head):
-        if not path.endswith(".py"):
+        ext = "." + path.rsplit(".", 1)[-1].lower() if "." in path else ""
+        if ext not in CODE_EXTENSIONS:
             continue
         if not any(path.startswith(sp.rstrip("/") + "/") or path.startswith(sp) for sp in src_paths):
             if "test" not in path:
