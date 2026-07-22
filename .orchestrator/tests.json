@@ -1,1 +1,144 @@
-{"records": []}
+{
+  "records": [
+    {
+      "id": "P1-01",
+      "phase": 1,
+      "kind": "predefined",
+      "description": "Correct semantic chunks extracted (all kinds present)",
+      "input": "parse sample_project/src",
+      "expected": "True",
+      "actual": "True",
+      "status": "PASS"
+    },
+    {
+      "id": "P1-02",
+      "phase": 1,
+      "kind": "predefined",
+      "description": "Stable ids generated (re-parse identical)",
+      "input": "parse users.py twice",
+      "expected": "True",
+      "actual": "True",
+      "status": "PASS"
+    },
+    {
+      "id": "P1-03",
+      "phase": 1,
+      "kind": "predefined",
+      "description": "Headings parsed",
+      "input": "parse docs/api.md",
+      "expected": "True",
+      "actual": "True",
+      "status": "PASS"
+    },
+    {
+      "id": "P1-04",
+      "phase": 1,
+      "kind": "predefined",
+      "description": "Nested heading path parsed (depth 3)",
+      "input": "create_user section",
+      "expected": "['API Reference', 'Users', 'create_user']",
+      "actual": "['API Reference', 'Users', 'create_user']",
+      "status": "PASS"
+    },
+    {
+      "id": "P1-05",
+      "phase": 1,
+      "kind": "predefined",
+      "description": "References extracted from section",
+      "input": "create_user section refs",
+      "expected": "True",
+      "actual": "True",
+      "status": "PASS"
+    },
+    {
+      "id": "P1-06",
+      "phase": 1,
+      "kind": "predefined",
+      "description": "Expected code->doc link created",
+      "input": "create_user unit",
+      "expected": "True",
+      "actual": "True",
+      "status": "PASS"
+    },
+    {
+      "id": "P1-07",
+      "phase": 1,
+      "kind": "predefined",
+      "description": "Unrelated sections NOT linked",
+      "input": "create_user unit vs Timeout",
+      "expected": "False",
+      "actual": "False",
+      "status": "PASS"
+    },
+    {
+      "id": "P1-08",
+      "phase": 1,
+      "kind": "orchestrator",
+      "description": "[edge] empty source yields no units",
+      "input": "parse ''",
+      "expected": "[]",
+      "actual": "[]",
+      "status": "PASS"
+    },
+    {
+      "id": "P1-09",
+      "phase": 1,
+      "kind": "orchestrator",
+      "description": "[negative] syntactically broken python does not crash",
+      "input": "parse 'def (: bad'",
+      "expected": "[]",
+      "actual": "[]",
+      "status": "PASS"
+    },
+    {
+      "id": "P1-10",
+      "phase": 1,
+      "kind": "orchestrator",
+      "description": "[edge] heading inside fenced code block is not a section",
+      "input": "```\\n# not a heading\\n```",
+      "expected": "0",
+      "actual": "0",
+      "status": "PASS"
+    },
+    {
+      "id": "P1-11",
+      "phase": 1,
+      "kind": "orchestrator",
+      "description": "[regression] all unit ids unique (no method/function id collision)",
+      "input": "all fixture units",
+      "expected": "True",
+      "actual": "True",
+      "status": "PASS"
+    },
+    {
+      "id": "P1-12",
+      "phase": 1,
+      "kind": "orchestrator",
+      "description": "[edge] prose section with no refs links to nothing",
+      "input": "API Reference root section",
+      "expected": "False",
+      "actual": "False",
+      "status": "PASS"
+    },
+    {
+      "id": "P1-13",
+      "phase": 1,
+      "kind": "orchestrator",
+      "description": "[regression] config key maps via EXACT method",
+      "input": "MAX_RETRIES",
+      "expected": "True",
+      "actual": "True",
+      "status": "PASS"
+    },
+    {
+      "id": "P1-14",
+      "phase": 1,
+      "kind": "orchestrator",
+      "description": "[edge] endpoint symbols include handler function name",
+      "input": "GET /users unit",
+      "expected": "True",
+      "actual": "True",
+      "status": "PASS"
+    }
+  ]
+}

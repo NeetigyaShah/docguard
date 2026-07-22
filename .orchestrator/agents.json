@@ -1,1 +1,3 @@
-{"agents": []}
+{"agents": [
+  {"id": "ab359e455", "feature": "F063", "task": "React+Vite dashboard (9 views over .orchestrator JSON)", "status": "FAILED", "worktree": "dashboard", "branch": "phase-6", "started": "build-session", "finished": "build-session", "commit": null, "report": "Subagent returned in 2.8s with 0 tool uses (no files produced). Reassigned to orchestrator; will build directly in Phase 6."}
+]}
