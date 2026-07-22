@@ -1,0 +1,413 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8"/>
+<meta name="viewport" content="width=device-width, initial-scale=1"/>
+<title>DocGuard — Self-Healing Technical Documentation</title>
+<style>
+  /* ---------- DocGuard brand tokens ---------- */
+  :root{
+    --ink:#0B1220; --surface:#111A2C; --surface-2:#18233A; --line:#26324D;
+    --text:#E8EEF9; --muted:#95A5C4; --faint:#5E6E90;
+    --heal:#2DD4A7; --heal-dim:#1E9B7C; --heal-glow:rgba(45,212,167,.16);
+    --stale:#F5B14C; --drift:#F0666B; --link:#77A9FF;
+    --mono:ui-monospace,"JetBrains Mono","SF Mono",Menlo,Consolas,monospace;
+    --sans:-apple-system,BlinkMacSystemFont,"Segoe UI",Inter,Roboto,sans-serif;
+    --r:14px; --s:clamp(18px,2.4vw,30px);
+  }
+  *{box-sizing:border-box;margin:0;padding:0}
+  html,body{height:100%}
+  body{background:var(--ink);color:var(--text);font-family:var(--sans);
+    -webkit-font-smoothing:antialiased;overflow:hidden}
+  /* ---------- deck / slides ---------- */
+  .deck{height:100vh;width:100vw;overflow:hidden;position:relative}
+  .slide{position:absolute;inset:0;display:none;flex-direction:column;
+    padding:clamp(32px,5vw,84px);opacity:0;transition:opacity .35s ease}
+  .slide.on{display:flex;opacity:1}
+  .slide::before{content:"";position:absolute;inset:0;z-index:-1;
+    background:radial-gradient(1200px 600px at 88% -10%,var(--heal-glow),transparent 60%),
+               radial-gradient(900px 500px at -10% 110%,rgba(119,169,255,.08),transparent 55%)}
+  /* ---------- typography ---------- */
+  h1{font-size:clamp(38px,6vw,84px);line-height:1.02;letter-spacing:-.03em;font-weight:800}
+  h2{font-size:clamp(26px,3.6vw,46px);line-height:1.06;letter-spacing:-.02em;font-weight:750}
+  .lede{font-size:clamp(17px,1.7vw,22px);color:var(--muted);max-width:60ch;line-height:1.5}
+  .eyebrow{font:600 13px/1 var(--mono);letter-spacing:.22em;text-transform:uppercase;color:var(--heal)}
+  .kicker{display:flex;align-items:center;gap:12px;margin-bottom:26px}
+  .kicker .n{font:600 12px/1 var(--mono);color:var(--faint);letter-spacing:.12em}
+  .grow{flex:1;min-height:0}
+  .row{display:flex;gap:clamp(20px,3vw,44px)}
+  .col{flex:1;min-width:0}
+  .center{justify-content:center}
+  .mt{margin-top:clamp(20px,3vh,40px)}
+  .mt-s{margin-top:14px}
+  /* ---------- brand mark ---------- */
+  .brand{display:flex;align-items:center;gap:14px}
+  .mark{width:44px;height:44px;flex:none;position:relative;filter:drop-shadow(0 3px 14px var(--heal-glow))}
+  .mark svg{width:100%;height:100%}
+  .brand .wm{font:800 21px/1 var(--sans);letter-spacing:-.02em}
+  .brand .wm b{color:var(--heal)}
+  /* ---------- chips / tags ---------- */
+  .chips{display:flex;flex-wrap:wrap;gap:10px}
+  .chip{font:600 12.5px/1 var(--mono);letter-spacing:.02em;padding:8px 12px;border-radius:999px;
+    border:1px solid var(--line);color:var(--muted);background:var(--surface);white-space:nowrap}
+  .chip.hl{color:var(--heal);border-color:var(--heal-dim);background:var(--heal-glow)}
+  .chip.warn{color:var(--stale);border-color:#7a5a22}
+  /* ---------- cards ---------- */
+  .card{background:linear-gradient(180deg,var(--surface),#0f1728);border:1px solid var(--line);
+    border-radius:var(--r);padding:clamp(18px,2vw,26px)}
+  .card h3{font-size:19px;font-weight:700;margin-bottom:8px;letter-spacing:-.01em}
+  .card p{color:var(--muted);font-size:15.5px;line-height:1.55}
+  .card .ic{font:700 20px/1 var(--mono);color:var(--heal);margin-bottom:14px;display:block}
+  .grid3{display:grid;grid-template-columns:repeat(3,1fr);gap:18px}
+  .grid4{display:grid;grid-template-columns:repeat(4,1fr);gap:16px}
+  .grid2{display:grid;grid-template-columns:1fr 1fr;gap:22px}
+  /* ---------- pipeline ---------- */
+  .pipe{display:flex;align-items:stretch;gap:0;flex-wrap:wrap}
+  .step{flex:1;min-width:120px;background:var(--surface);border:1px solid var(--line);
+    border-radius:12px;padding:16px 14px;position:relative}
+  .step .t{font:700 14px/1.2 var(--sans)}
+  .step .d{font:500 12.5px/1.4 var(--mono);color:var(--faint);margin-top:8px}
+  .step .num{font:700 11px/1 var(--mono);color:var(--heal);letter-spacing:.1em}
+  .arrow{align-self:center;color:var(--faint);font-size:20px;padding:0 8px}
+  /* ---------- code / diff ---------- */
+  .code{background:#0A1120;border:1px solid var(--line);border-radius:12px;overflow:hidden;font:13.5px/1.7 var(--mono)}
+  .code .bar{display:flex;align-items:center;gap:8px;padding:10px 14px;border-bottom:1px solid var(--line);
+    background:#0c1424;color:var(--muted);font-size:12px}
+  .code .bar .dot{width:10px;height:10px;border-radius:50%}
+  .code pre{padding:14px 16px;overflow:auto;white-space:pre-wrap;word-break:break-word}
+  .code .fn{color:var(--faint)}
+  .add{color:#8ff0cf;background:rgba(45,212,167,.10);display:block;border-left:2px solid var(--heal)}
+  .del{color:#ffb3b6;background:rgba(240,102,107,.10);display:block;border-left:2px solid var(--drift);text-decoration:line-through;text-decoration-color:rgba(240,102,107,.5)}
+  .add::before{content:"+ ";color:var(--heal);text-decoration:none}
+  .del::before{content:"− ";color:var(--drift)}
+  .ctx{color:var(--muted);display:block;padding-left:14px}
+  /* ---------- screenshot frame ---------- */
+  .shot{border:1px solid var(--line);border-radius:12px;overflow:hidden;background:#fff;
+    box-shadow:0 20px 60px rgba(0,0,0,.45)}
+  .shot img{display:block;width:100%}
+  .shot.crop{height:100%;max-height:62vh}
+  .shot.crop img{object-fit:cover;object-position:top}
+  .cap{font:500 12.5px/1.4 var(--mono);color:var(--faint);margin-top:10px}
+  .cap a{color:var(--link);text-decoration:none}
+  /* ---------- stat ---------- */
+  .stat{display:flex;flex-direction:column;gap:4px}
+  .stat .v{font:800 clamp(30px,3.4vw,44px)/1 var(--sans);letter-spacing:-.02em}
+  .stat .v.g{color:var(--heal)}
+  .stat .k{font:600 12.5px/1.3 var(--mono);color:var(--muted);letter-spacing:.04em}
+  .callout{border-left:3px solid var(--heal);padding:6px 0 6px 18px;color:var(--muted);font-size:16px;line-height:1.55}
+  .callout b{color:var(--text)}
+  .lbl{display:inline-flex;align-items:center;gap:7px;font:600 12px/1 var(--mono);color:var(--muted);letter-spacing:.06em;text-transform:uppercase}
+  .lbl .d{width:8px;height:8px;border-radius:50%}
+  ul.clean{list-style:none;display:flex;flex-direction:column;gap:12px}
+  ul.clean li{padding-left:26px;position:relative;color:var(--muted);font-size:16px;line-height:1.5}
+  ul.clean li::before{content:"▸";position:absolute;left:0;color:var(--heal)}
+  ul.clean li b{color:var(--text)}
+  /* ---------- chrome ---------- */
+  .foot{position:fixed;bottom:18px;left:0;right:0;display:flex;align-items:center;
+    justify-content:space-between;padding:0 clamp(24px,4vw,64px);z-index:20;pointer-events:none}
+  .foot .fb{font:600 12px/1 var(--mono);color:var(--faint);letter-spacing:.08em}
+  .prog{position:fixed;top:0;left:0;height:3px;background:var(--heal);z-index:30;transition:width .35s ease;
+    box-shadow:0 0 12px var(--heal)}
+  .dots{display:flex;gap:8px;pointer-events:auto}
+  .dots i{width:8px;height:8px;border-radius:50%;background:var(--line);cursor:pointer;transition:.2s}
+  .dots i.on{background:var(--heal);transform:scale(1.25)}
+  .hint{position:fixed;bottom:16px;left:50%;transform:translateX(-50%);font:500 11px/1 var(--mono);
+    color:var(--faint);z-index:20;opacity:.7}
+  @media print{
+    body,.deck{height:auto;overflow:visible}
+    .slide{display:flex!important;opacity:1!important;position:relative;height:100vh;page-break-after:always;inset:auto}
+    .foot,.prog,.hint,.dots{display:none}
+  }
+</style>
+</head>
+<body>
+<div class="prog" id="prog"></div>
+<div class="deck" id="deck">
+
+  <!-- 1 — TITLE -->
+  <section class="slide">
+    <div class="brand"><div class="mark">
+      <svg viewBox="0 0 48 48" fill="none">
+        <path d="M24 3l16 6v11c0 11-7 19-16 24C15 39 8 31 8 20V9l16-6z" fill="#0f1728" stroke="#2DD4A7" stroke-width="1.6"/>
+        <path d="M15 25h5l3-8 4 14 3-8h3" stroke="#2DD4A7" stroke-width="2.2" fill="none" stroke-linecap="round" stroke-linejoin="round"/>
+      </svg></div>
+      <span class="wm">Doc<b>Guard</b></span>
+    </div>
+    <div class="grow" style="display:flex;flex-direction:column;justify-content:center">
+      <div class="eyebrow">Self-Healing Technical Documentation</div>
+      <h1 class="mt-s">Docs that heal<br/>themselves.</h1>
+      <p class="lede mt">When your code changes, your docs quietly start lying. DocGuard reads the diff,
+        finds the docs it broke, and fixes them — across <b style="color:var(--text)">Python, TypeScript, JavaScript &amp; Java</b> — before the drift ships.</p>
+      <div class="chips mt">
+        <span class="chip hl">detect → verify → repair → gate → PR</span>
+        <span class="chip">tree-sitter universal parser</span>
+        <span class="chip">runs as a GitHub Action</span>
+      </div>
+    </div>
+    <div class="lbl"><span class="d" style="background:var(--heal)"></span> A working system · 106 tests green · real-repo validated</div>
+  </section>
+
+  <!-- 2 — THE PROBLEM (real PR) -->
+  <section class="slide">
+    <div class="kicker"><span class="eyebrow">The problem</span><span class="n">/ 02</span></div>
+    <div class="row grow">
+      <div class="col" style="max-width:44%;display:flex;flex-direction:column;justify-content:center">
+        <h2>Every feature PR is a<br/>promise to update the docs.</h2>
+        <p class="lede mt">A real merged PR in <b style="color:var(--text)">likec4</b> (4.2k★). Adding one CLI flag
+          touched <b style="color:var(--text)">8 files</b> — and the author had to <em>remember</em> to hand-edit the docs.</p>
+        <div class="mt">
+          <div class="callout"><b>“☑ My change requires documentation updates.<br/>☑ I've updated the documentation accordingly.”</b><br/>
+            — a checkbox is the only thing standing between code and stale docs.</div>
+        </div>
+        <div class="chips mt"><span class="chip warn">Miss the box → the docs silently lie</span></div>
+      </div>
+      <div class="col" style="display:flex;flex-direction:column">
+        <div class="shot crop"><img src="assets/pr2971_header.png" alt="likec4 PR #2971 merged"/></div>
+        <div class="cap">Real: <a href="https://github.com/likec4/likec4/pull/2971">github.com/likec4/likec4/pull/2971</a> — merged into <code>main</code></div>
+      </div>
+    </div>
+  </section>
+
+  <!-- 3 — HOW DOCS CHANGED (diff) -->
+  <section class="slide">
+    <div class="kicker"><span class="eyebrow">How the docs changed</span><span class="n">/ 03</span></div>
+    <h2>One option. Three files. All by hand.</h2>
+    <p class="lede mt-s">The same PR edits the code <em>and</em> mirrors it into the Markdown docs table — manually, in lockstep.</p>
+    <div class="row mt grow">
+      <div class="col">
+        <div class="code">
+          <div class="bar"><span class="dot" style="background:#f0666b"></span><span class="dot" style="background:#f5b14c"></span><span class="dot" style="background:#2dd4a7"></span><span style="margin-left:6px">the code (options.ts · serve.ts)</span></div>
+          <pre><span class="add">.option('allowed-host', allowedHost)</span><span class="add">allowedHosts: args['allowed-host'],</span></pre>
+        </div>
+        <div class="cap">packages/likec4/src/cli/…</div>
+      </div>
+      <div class="col" style="flex:1.15">
+        <div class="shot"><img src="assets/pr2971_clidiff.png" alt="cli.mdx diff"/></div>
+        <div class="cap">apps/docs/src/content/docs/tooling/<b style="color:var(--muted)">cli.mdx</b> — the doc the human must not forget</div>
+      </div>
+    </div>
+  </section>
+
+  <!-- 4 — THE PIPELINE -->
+  <section class="slide">
+    <div class="kicker"><span class="eyebrow">What DocGuard does</span><span class="n">/ 04</span></div>
+    <h2>Read the diff. Fix only what it broke.</h2>
+    <p class="lede mt-s">On every push, DocGuard runs one deterministic pipeline — cheap filters first, an LLM only where it matters.</p>
+    <div class="pipe mt grow" style="align-items:center;flex:0">
+      <div class="step"><div class="num">01</div><div class="t mt-s">Detect</div><div class="d">parse code diff → changed units + params</div></div>
+      <div class="arrow">→</div>
+      <div class="step"><div class="num">02</div><div class="t mt-s">Map</div><div class="d">link changed code → the doc sections about it</div></div>
+      <div class="arrow">→</div>
+      <div class="step"><div class="num">03</div><div class="t mt-s">Verify</div><div class="d">is this section actually stale now?</div></div>
+      <div class="arrow">→</div>
+      <div class="step"><div class="num">04</div><div class="t mt-s">Repair</div><div class="d">targeted fix — untouched text stays byte-identical</div></div>
+      <div class="arrow">→</div>
+      <div class="step"><div class="num">05</div><div class="t mt-s">Gate</div><div class="d">confident → open PR · unsure → review comment</div></div>
+    </div>
+    <div class="grid3 mt">
+      <div class="card"><span class="ic">◇</span><h3>Cost-aware</h3><p>Mapping filters candidates before any model call; only meaningful changes are verified.</p></div>
+      <div class="card"><span class="ic">⤳</span><h3>Surgical</h3><p>Repairs change the stale fact and nothing else — no reformatting, no drift-in-disguise.</p></div>
+      <div class="card"><span class="ic">⛨</span><h3>Safe by default</h3><p>Offline mock providers ship by default; real LLM &amp; GitHub are opt-in behind interfaces.</p></div>
+    </div>
+  </section>
+
+  <!-- 5 — UNIVERSAL PARSER -->
+  <section class="slide">
+    <div class="kicker"><span class="eyebrow">The unlock</span><span class="n">/ 05</span></div>
+    <div class="row grow">
+      <div class="col" style="max-width:46%;display:flex;flex-direction:column;justify-content:center">
+        <h2>One flow.<br/>Four languages.</h2>
+        <p class="lede mt">Corporate monorepos are polyglot — TS frontend, Java backend, Python services. A Python-only docs bot is a toy.</p>
+        <ul class="clean mt">
+          <li><b>tree-sitter</b> grammars — real parsers, not regex</li>
+          <li>Change detection is <b>language-agnostic</b>: structured params, not per-language rules</li>
+          <li>Unknown language or bad file → skipped, never a crash <b>(CI-safe)</b></li>
+          <li>Nothing forked — the <em>same</em> detect→heal pipeline for all four</li>
+        </ul>
+      </div>
+      <div class="col" style="display:flex;flex-direction:column;justify-content:center;gap:16px">
+        <div class="grid2">
+          <div class="card"><span class="ic">py</span><h3>Python</h3><p>stdlib <code>ast</code> — zero deps</p></div>
+          <div class="card"><span class="ic">ts</span><h3>TypeScript</h3><p>+ .tsx</p></div>
+          <div class="card"><span class="ic">js</span><h3>JavaScript</h3><p>+ jsx / mjs / cjs</p></div>
+          <div class="card"><span class="ic">jv</span><h3>Java</h3><p>classes · methods</p></div>
+        </div>
+        <div class="callout">Built &amp; <b>adversarially verified</b> by a 6-agent workflow — which caught real bugs a first pass missed: TS parenless arrows, JS generators, Java enum methods.</div>
+      </div>
+    </div>
+  </section>
+
+  <!-- 6 — IN ACTION (real TS auto-heal) -->
+  <section class="slide">
+    <div class="kicker"><span class="eyebrow">In action · real run</span><span class="n">/ 06</span></div>
+    <h2>A TypeScript rename, healed automatically.</h2>
+    <p class="lede mt-s">A param is renamed in <code>.ts</code>. DocGuard flags the stale doc and rewrites <em>only</em> the two mentions — through the full pipeline, offline.</p>
+    <div class="row mt grow">
+      <div class="col">
+        <div class="lbl mb"><span class="d" style="background:var(--drift)"></span> the code change</div>
+        <div class="code mt-s">
+          <div class="bar"><span class="dot" style="background:#f5b14c"></span><span style="margin-left:4px">src/api.ts</span></div>
+          <pre><span class="del">export function createUser(name, role = "viewer")</span><span class="add">export function createUser(name, userRole = "viewer")</span></pre>
+        </div>
+        <div class="chips mt"><span class="chip hl">detected stale: 1</span><span class="chip hl">auto-fix: 1</span><span class="chip">review: 0</span></div>
+      </div>
+      <div class="col">
+        <div class="lbl"><span class="d" style="background:var(--heal)"></span> DocGuard's doc fix — api.md</div>
+        <div class="code mt-s">
+          <div class="bar"><span class="dot" style="background:#2dd4a7"></span><span style="margin-left:4px">docs/api.md · auto-generated</span></div>
+          <pre><span class="del">`createUser` accepts `name` and `role`. The default `role` is `viewer`.</span><span class="add">`createUser` accepts `name` and `userRole`. The default `userRole` is `viewer`.</span></pre>
+        </div>
+        <div class="cap">Both mentions fixed · every other byte identical.</div>
+      </div>
+    </div>
+  </section>
+
+  <!-- 7 — REAL LLM ON REAL REPOS -->
+  <section class="slide">
+    <div class="kicker"><span class="eyebrow">Validated on real repos</span><span class="n">/ 07</span></div>
+    <h2>Real model. Real projects. Real fixes.</h2>
+    <p class="lede mt-s">With a live LLM (DeepSeek), DocGuard reproduces the doc fix a human would make — prose <em>and</em> code examples.</p>
+    <div class="grid2 mt grow">
+      <div class="col">
+        <div class="lbl"><span class="d" style="background:var(--heal)"></span> pydantic · Field(frozen=…)</div>
+        <div class="code mt-s"><div class="bar"><span style="color:var(--heal)">verdict: stale · confidence 1.0 · changed ✓</span></div>
+          <pre><span class="del">The parameter `frozen` is used to emulate…</span><span class="add">The parameter `is_frozen` is used to emulate…</span><span class="del">    name: str = Field(frozen=True)</span><span class="add">    name: str = Field(is_frozen=True)</span></pre></div>
+      </div>
+      <div class="col">
+        <div class="lbl"><span class="d" style="background:var(--heal)"></span> httpx · follow_redirects</div>
+        <div class="code mt-s"><div class="bar"><span style="color:var(--heal)">verdict: stale · confidence 1.0 · changed ✓</span></div>
+          <pre><span class="del">…the `follow_redirects` parameter:</span><span class="add">…the `allow_redirects` parameter:</span><span class="del">>>> r = httpx.get(url, follow_redirects=True)</span><span class="add">>>> r = httpx.get(url, allow_redirects=True)</span></pre></div>
+      </div>
+    </div>
+    <div class="callout mt">It even fixes the <b>code-example line</b> inside the docs — the part humans most often forget.</div>
+  </section>
+
+  <!-- 8 — SAFE BY DESIGN -->
+  <section class="slide">
+    <div class="kicker"><span class="eyebrow">Trust</span><span class="n">/ 08</span></div>
+    <h2>It never edits blindly.</h2>
+    <p class="lede mt-s">Every repair is scored and gated. Confidence decides whether DocGuard acts or asks.</p>
+    <div class="grid2 mt grow" style="align-items:stretch">
+      <div class="card" style="border-color:var(--heal-dim)">
+        <div class="lbl"><span class="d" style="background:var(--heal)"></span> High confidence + low risk</div>
+        <h3 class="mt-s" style="color:var(--heal)">→ Opens a pull request</h3>
+        <p>Renames &amp; default changes with an unambiguous fix. The diff touches only the stale span.</p>
+      </div>
+      <div class="card" style="border-color:#7a5a22">
+        <div class="lbl"><span class="d" style="background:var(--stale)"></span> Low confidence or risky</div>
+        <h3 class="mt-s" style="color:var(--stale)">→ Leaves a review comment</h3>
+        <p>Removed features, ambiguous prose, big rewrites — flagged for a human, never auto-deleted.</p>
+      </div>
+    </div>
+    <div class="chips mt">
+      <span class="chip">byte-identical outside the fix</span>
+      <span class="chip">no secrets in output</span>
+      <span class="chip">loop-prevention on bot branches</span>
+      <span class="chip">deterministic &amp; reproducible</span>
+    </div>
+  </section>
+
+  <!-- 9 — DEPLOY / PROOF -->
+  <section class="slide">
+    <div class="kicker"><span class="eyebrow">Ships as a GitHub Action</span><span class="n">/ 09</span></div>
+    <h2>Drop it in CI. It runs on every PR.</h2>
+    <div class="grid4 mt">
+      <div class="stat"><span class="v g">106</span><span class="k">tests passing</span></div>
+      <div class="stat"><span class="v g">4</span><span class="k">languages</span></div>
+      <div class="stat"><span class="v g">0</span><span class="k">ruff / mypy issues</span></div>
+      <div class="stat"><span class="v g">107<span style="font-size:.5em">MB</span></span><span class="k">Docker image</span></div>
+    </div>
+    <div class="row mt grow">
+      <div class="col card">
+        <h3>Verified end-to-end</h3>
+        <ul class="clean mt-s">
+          <li>Action image <b>builds on python:3.11-slim</b> with tree-sitter in core deps</li>
+          <li>Grammars <b>load &amp; parse TS/Java inside the container</b></li>
+          <li><code>analyze()</code> heals a real TS repo &amp; flags a Java rename end-to-end</li>
+        </ul>
+      </div>
+      <div class="col">
+        <div class="code" style="height:100%">
+          <div class="bar"><span class="dot" style="background:#2dd4a7"></span><span style="margin-left:4px">.github/workflows/docs.yml</span></div>
+          <pre><span class="ctx" style="padding-left:0"> on: [pull_request]</span><span class="ctx" style="padding-left:0"> jobs:</span><span class="ctx" style="padding-left:0">   docguard:</span><span class="ctx" style="padding-left:0">     runs-on: ubuntu-latest</span><span class="ctx" style="padding-left:0">     steps:</span><span class="ctx" style="padding-left:0">       - uses: actions/checkout@v4</span><span class="add">      - uses: likec4-org/docguard@v1</span><span class="ctx" style="padding-left:0">         with:</span><span class="ctx" style="padding-left:0">           src: packages   docs: apps/docs</span></pre>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- 10 — HONEST ROADMAP -->
+  <section class="slide">
+    <div class="kicker"><span class="eyebrow">What's next · honest</span><span class="n">/ 10</span></div>
+    <h2>Real repos tell you what to build.</h2>
+    <p class="lede mt-s">Pointing DocGuard at likec4's own API docs surfaced the exact next step — no guessing.</p>
+    <div class="row mt grow">
+      <div class="col card" style="border-color:#7a5a22">
+        <div class="lbl"><span class="d" style="background:var(--stale)"></span> The gap we found</div>
+        <p class="mt-s">likec4's public API lives in a TS <code>namespace</code>, and its docs describe <b>option-object fields</b> (<code>throwIfInvalid</code>) and <b>CLI flags</b> (<code>--allowed-host</code>) — not raw params.
+        The parser extracted <b>0 units</b> from <code>LikeC4.ts</code>.</p>
+      </div>
+      <div class="col">
+        <ul class="clean">
+          <li><b>Descend into TS namespaces / modules</b> — reach the real exports</li>
+          <li><b>Extract interface &amp; type-object members</b> as documentable units</li>
+          <li><b>kebab ↔ camel mapping</b> so <code>--allowed-host</code> links to <code>allowedHost</code></li>
+          <li>Then likec4's <code>cli.mdx</code> table heals itself, too</li>
+        </ul>
+        <div class="callout mt">Recorded as a tracked follow-up — the tool's honesty is a feature, not an asterisk.</div>
+      </div>
+    </div>
+  </section>
+
+  <!-- 11 — CLOSE -->
+  <section class="slide">
+    <div class="grow" style="display:flex;flex-direction:column;justify-content:center">
+      <div class="brand mb" style="margin-bottom:28px"><div class="mark">
+        <svg viewBox="0 0 48 48" fill="none">
+          <path d="M24 3l16 6v11c0 11-7 19-16 24C15 39 8 31 8 20V9l16-6z" fill="#0f1728" stroke="#2DD4A7" stroke-width="1.6"/>
+          <path d="M15 25h5l3-8 4 14 3-8h3" stroke="#2DD4A7" stroke-width="2.2" fill="none" stroke-linecap="round" stroke-linejoin="round"/>
+        </svg></div><span class="wm">Doc<b>Guard</b></span></div>
+      <h1>Every merge,<br/>docs that match the code.</h1>
+      <p class="lede mt">Detect the drift. Heal what's safe. Flag what's not. In four languages, in your existing CI.</p>
+      <div class="chips mt"><span class="chip hl">detect → verify → repair → gate → PR</span><span class="chip">Python · TypeScript · JavaScript · Java</span></div>
+    </div>
+    <div class="lbl"><span class="d" style="background:var(--heal)"></span> DocGuard — Self-Healing Technical Documentation</div>
+  </section>
+
+</div>
+
+<div class="foot">
+  <div class="fb" id="fb-l">Doc<span style="color:var(--heal)">Guard</span></div>
+  <div class="dots" id="dots"></div>
+  <div class="fb" id="fb-r">01 / 11</div>
+</div>
+<div class="hint">← → or space to navigate · F fullscreen · P print</div>
+
+<script>
+  const slides=[...document.querySelectorAll('.slide')];
+  const dots=document.getElementById('dots');
+  const prog=document.getElementById('prog');
+  const fbR=document.getElementById('fb-r');
+  let i=0;
+  slides.forEach((_,k)=>{const d=document.createElement('i');d.onclick=()=>go(k);dots.appendChild(d);});
+  const dEls=[...dots.children];
+  function go(n){
+    i=Math.max(0,Math.min(slides.length-1,n));
+    slides.forEach((s,k)=>s.classList.toggle('on',k===i));
+    dEls.forEach((d,k)=>d.classList.toggle('on',k===i));
+    prog.style.width=((i+1)/slides.length*100)+'%';
+    fbR.textContent=String(i+1).padStart(2,'0')+' / '+String(slides.length).padStart(2,'0');
+  }
+  document.addEventListener('keydown',e=>{
+    if(e.key==='ArrowRight'||e.key===' '||e.key==='PageDown'){e.preventDefault();go(i+1);}
+    else if(e.key==='ArrowLeft'||e.key==='PageUp'){e.preventDefault();go(i-1);}
+    else if(e.key==='Home')go(0); else if(e.key==='End')go(slides.length-1);
+    else if(e.key==='f'||e.key==='F'){document.fullscreenElement?document.exitFullscreen():document.documentElement.requestFullscreen();}
+    else if(e.key==='p'||e.key==='P'){window.print();}
+  });
+  let sx=0;
+  addEventListener('touchstart',e=>sx=e.touches[0].clientX,{passive:true});
+  addEventListener('touchend',e=>{const dx=e.changedTouches[0].clientX-sx;if(Math.abs(dx)>50)go(i+(dx<0?1:-1));},{passive:true});
+  go(0);
+</script>
+</body>
+</html>
