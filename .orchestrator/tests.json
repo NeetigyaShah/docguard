@@ -279,6 +279,106 @@
       "expected": "('internal_refactor', False)",
       "actual": "('internal_refactor', False)",
       "status": "PASS"
+    },
+    {
+      "id": "P3-01",
+      "phase": 3,
+      "kind": "predefined",
+      "description": "Renamed param w/ old docs -> STALE",
+      "input": "role->user_role vs create_user doc",
+      "expected": "'stale'",
+      "actual": "'stale'",
+      "status": "PASS"
+    },
+    {
+      "id": "P3-02",
+      "phase": 3,
+      "kind": "predefined",
+      "description": "Changed default w/ old documented default -> STALE",
+      "input": "viewer->member",
+      "expected": "'stale'",
+      "actual": "'stale'",
+      "status": "PASS"
+    },
+    {
+      "id": "P3-03",
+      "phase": 3,
+      "kind": "predefined",
+      "description": "Internal refactor, unchanged behavior -> ACCURATE",
+      "input": "body rewrite",
+      "expected": "'accurate'",
+      "actual": "'accurate'",
+      "status": "PASS"
+    },
+    {
+      "id": "P3-04",
+      "phase": 3,
+      "kind": "predefined",
+      "description": "Unrelated new config key -> UNRELATED",
+      "input": "MAX_RETRIES vs create_user doc",
+      "expected": "'unrelated'",
+      "actual": "'unrelated'",
+      "status": "PASS"
+    },
+    {
+      "id": "P3-05",
+      "phase": 3,
+      "kind": "predefined",
+      "description": "Removed feature still documented -> STALE",
+      "input": "delete remove_member",
+      "expected": "'stale'",
+      "actual": "'stale'",
+      "status": "PASS"
+    },
+    {
+      "id": "P3-06",
+      "phase": 3,
+      "kind": "predefined",
+      "description": "Confusion over 5 labelled cases (tp,fp,fn)",
+      "input": "5 scenarios",
+      "expected": "(3, 0, 0)",
+      "actual": "(3, 0, 0)",
+      "status": "PASS"
+    },
+    {
+      "id": "P3-07",
+      "phase": 3,
+      "kind": "orchestrator",
+      "description": "[security] doc prompt-injection cannot force STALE on unrelated change",
+      "input": "injection section + config change",
+      "expected": "'unrelated'",
+      "actual": "'unrelated'",
+      "status": "PASS"
+    },
+    {
+      "id": "P3-08",
+      "phase": 3,
+      "kind": "orchestrator",
+      "description": "[integration] verify_changes yields 1 STALE for rename",
+      "input": "end-to-end",
+      "expected": "1",
+      "actual": "1",
+      "status": "PASS"
+    },
+    {
+      "id": "P3-09",
+      "phase": 3,
+      "kind": "orchestrator",
+      "description": "[regression] rename STALE confidence >= 0.85",
+      "input": "high-confidence path",
+      "expected": "True",
+      "actual": "True",
+      "status": "PASS"
+    },
+    {
+      "id": "P3-10",
+      "phase": 3,
+      "kind": "orchestrator",
+      "description": "[negative] non-meaningful impact is not verified",
+      "input": "whitespace impact",
+      "expected": "0",
+      "actual": "0",
+      "status": "PASS"
     }
   ]
 }

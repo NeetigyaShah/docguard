@@ -5,3 +5,5 @@
 {"ts": "2026-07-22T09:56:26Z", "actor": "orchestrator", "feature": "phase-2", "action": "milestone suite (14 serial)", "result": "13/14 PASS", "commit": ""}
 {"ts": "2026-07-22T09:57:08Z", "actor": "orchestrator", "feature": "phase-2", "action": "milestone suite (14 serial)", "result": "14/14 PASS", "commit": ""}
 {"ts": "2026-07-22T09:57:50Z", "actor": "orchestrator", "feature": "F020-F021", "action": "Phase 2 diff + classifier + milestone", "result": "45 pytest pass; milestone 14/14; ruff clean", "commit": ""}
+{"ts": "2026-07-22T09:59:47Z", "actor": "orchestrator", "feature": "phase-3", "action": "milestone suite (10 serial)", "result": "10/10 PASS", "commit": ""}
+{"ts": "2026-07-22T10:00:37Z", "actor": "orchestrator", "feature": "F030", "action": "Phase 3 staleness verifier + milestone", "result": "55 pytest pass; milestone 10/10; confusion tp3/fp0/fn0; injection-safe", "commit": ""}
