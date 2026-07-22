@@ -379,6 +379,136 @@
       "expected": "0",
       "actual": "0",
       "status": "PASS"
+    },
+    {
+      "id": "P4-01",
+      "phase": 4,
+      "kind": "predefined",
+      "description": "Parameter rename correction -> auto_fix + `user_role`",
+      "input": "role->user_role",
+      "expected": "(True, 'auto_fix')",
+      "actual": "(True, 'auto_fix')",
+      "status": "PASS"
+    },
+    {
+      "id": "P4-02",
+      "phase": 4,
+      "kind": "predefined",
+      "description": "Default-value correction -> auto_fix + member",
+      "input": "viewer->member",
+      "expected": "(True, 'auto_fix')",
+      "actual": "(True, 'auto_fix')",
+      "status": "PASS"
+    },
+    {
+      "id": "P4-03",
+      "phase": 4,
+      "kind": "predefined",
+      "description": "Removed feature -> human_review (no destructive auto-edit)",
+      "input": "delete remove_member",
+      "expected": "'human_review'",
+      "actual": "'human_review'",
+      "status": "PASS"
+    },
+    {
+      "id": "P4-04",
+      "phase": 4,
+      "kind": "predefined",
+      "description": "Complex change (param removed) -> human_review",
+      "input": "drop add_member param",
+      "expected": "'human_review'",
+      "actual": "'human_review'",
+      "status": "PASS"
+    },
+    {
+      "id": "P4-05",
+      "phase": 4,
+      "kind": "predefined",
+      "description": "Unrelated paragraph preserved byte-identical",
+      "input": "rename repair",
+      "expected": "True",
+      "actual": "True",
+      "status": "PASS"
+    },
+    {
+      "id": "P4-06",
+      "phase": 4,
+      "kind": "predefined",
+      "description": "Heading preservation (style_ok) on rename",
+      "input": "rename repair",
+      "expected": "True",
+      "actual": "True",
+      "status": "PASS"
+    },
+    {
+      "id": "P4-07",
+      "phase": 4,
+      "kind": "predefined",
+      "description": "Formatting preserved (scope_ok, same line count)",
+      "input": "rename repair",
+      "expected": "True",
+      "actual": "True",
+      "status": "PASS"
+    },
+    {
+      "id": "P4-08",
+      "phase": 4,
+      "kind": "orchestrator",
+      "description": "[regression] validation ok for rename",
+      "input": "rename repair",
+      "expected": "True",
+      "actual": "True",
+      "status": "PASS"
+    },
+    {
+      "id": "P4-09",
+      "phase": 4,
+      "kind": "orchestrator",
+      "description": "[edge] rename repair changes exactly the two backticked refs",
+      "input": "count diff lines",
+      "expected": "1",
+      "actual": "1",
+      "status": "PASS"
+    },
+    {
+      "id": "P4-10",
+      "phase": 4,
+      "kind": "orchestrator",
+      "description": "[negative] removal produces no auto-applied edit",
+      "input": "removal repair.changed",
+      "expected": "False",
+      "actual": "False",
+      "status": "PASS"
+    },
+    {
+      "id": "P4-11",
+      "phase": 4,
+      "kind": "orchestrator",
+      "description": "[regression] auto_fix reserved for HIGH confidence + low risk",
+      "input": "rename level",
+      "expected": "'high'",
+      "actual": "'high'",
+      "status": "PASS"
+    },
+    {
+      "id": "P4-12",
+      "phase": 4,
+      "kind": "orchestrator",
+      "description": "[edge] tightening high threshold demotes auto_fix to review",
+      "input": "high_confidence=0.99",
+      "expected": "'human_review'",
+      "actual": "'human_review'",
+      "status": "PASS"
+    },
+    {
+      "id": "P4-13",
+      "phase": 4,
+      "kind": "orchestrator",
+      "description": "[security] no line without a `role` ref is altered",
+      "input": "rename repair",
+      "expected": "True",
+      "actual": "True",
+      "status": "PASS"
     }
   ]
 }

@@ -240,9 +240,11 @@ class MockLLMProvider(LLMProvider):
         original = section.content
         repaired = original
 
-        # targeted token swaps only — everything else stays byte-identical
+        # targeted swaps only — everything else stays byte-identical.
+        # Param renames: only inside `backticks` (a bare word like "role" in prose
+        # may name an unrelated field); default values: whole-word (values are specific).
         for old_name, new_name in _renames(impact.old_source, impact.new_source):
-            repaired = re.sub(rf"\b{re.escape(old_name)}\b", new_name, repaired)
+            repaired = re.sub(rf"`{re.escape(old_name)}`", f"`{new_name}`", repaired)
         for _name, old_def, new_def in _default_changes(impact.old_source, impact.new_source):
             uq_old, uq_new = _unquote(old_def), _unquote(new_def)
             if uq_old:
