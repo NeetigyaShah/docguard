@@ -1,0 +1,380 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8"/>
+<meta name="viewport" content="width=device-width, initial-scale=1"/>
+<title>DocGuard for Tests — a proposal</title>
+<style>
+  :root{
+    --ink:#F5F8FD; --surface:#FFFFFF; --line:#DCE5F1; --text:#0F1A2C; --muted:#54627C; --faint:#93A0B6;
+    --heal:#0AA07A; --heal-dim:#0AA07A; --heal-glow:rgba(10,160,122,.13); --stale:#B9761A; --drift:#D8465A; --link:#2C64F0;
+    --mono:ui-monospace,"JetBrains Mono","SF Mono",Menlo,Consolas,monospace;
+    --sans:-apple-system,BlinkMacSystemFont,"Segoe UI",Inter,Roboto,sans-serif;
+  }
+  *{box-sizing:border-box;margin:0;padding:0}
+  html,body{height:100%}
+  body{background:var(--ink);color:var(--text);font-family:var(--sans);-webkit-font-smoothing:antialiased;overflow:hidden}
+  .deck{height:100vh;width:100vw;overflow:hidden;position:relative}
+  .slide{position:absolute;inset:0;display:none;flex-direction:column;padding:clamp(28px,4.4vw,70px);opacity:0;transition:opacity .4s ease}
+  .slide.on{display:flex;opacity:1}
+  .slide.dark::before{content:"";position:absolute;inset:0;z-index:-1;
+    background:radial-gradient(1100px 560px at 85% -12%,var(--heal-glow),transparent 60%),
+               radial-gradient(900px 500px at -10% 110%,rgba(119,169,255,.07),transparent 55%)}
+  h2{font-size:clamp(23px,3.2vw,42px);line-height:1.07;letter-spacing:-.02em;font-weight:750}
+  h3{font-size:18px;font-weight:700;letter-spacing:-.01em}
+  .big{font-size:clamp(30px,4.4vw,60px);line-height:1.03;letter-spacing:-.03em;font-weight:800}
+  .lede{font-size:clamp(16px,1.6vw,21px);color:var(--muted);max-width:66ch;line-height:1.5}
+  .eyebrow{font:600 13px/1 var(--mono);letter-spacing:.2em;text-transform:uppercase;color:var(--heal)}
+  .kicker{display:flex;align-items:center;gap:12px;margin-bottom:20px}
+  .kicker .n{font:600 12px/1 var(--mono);color:var(--faint);letter-spacing:.12em}
+  .grow{flex:1;min-height:0} .center{justify-content:center}
+  .row{display:flex;gap:clamp(18px,2.6vw,38px)} .col{flex:1;min-width:0}
+  .mt{margin-top:clamp(16px,2.4vh,32px)} .mt-s{margin-top:10px} .mt-l{margin-top:clamp(22px,3.6vh,44px)}
+  .brand{display:flex;align-items:center;gap:12px}
+  .mark{width:40px;height:40px;flex:none;filter:drop-shadow(0 3px 14px var(--heal-glow))} .mark svg{width:100%;height:100%}
+  .brand .wm{font:800 20px/1 var(--sans);letter-spacing:-.02em} .brand .wm b{color:var(--heal)}
+  .chips{display:flex;flex-wrap:wrap;gap:9px}
+  .chip{font:600 12.5px/1 var(--mono);padding:8px 12px;border-radius:999px;border:1px solid var(--line);color:var(--muted);background:var(--surface);white-space:nowrap}
+  .chip.hl{color:var(--heal);border-color:var(--heal-dim);background:var(--heal-glow)}
+  .chip.warn{color:var(--stale);border-color:#E3C089}
+  .card{background:linear-gradient(180deg,#FFFFFF,#F3F6FC);border:1px solid var(--line);border-radius:14px;padding:clamp(16px,1.9vw,24px);box-shadow:0 1px 2px rgba(16,30,60,.04)}
+  .card p{color:var(--muted);font-size:15px;line-height:1.5;margin-top:6px}
+  .card .num{font:800 26px/1 var(--sans);color:var(--heal)}
+  .code{background:#F1F5FB;border:1px solid var(--line);border-radius:12px;overflow:hidden;font:13.5px/1.7 var(--mono);color:#26344c}
+  .code .bar{display:flex;align-items:center;gap:8px;padding:9px 14px;border-bottom:1px solid var(--line);background:#E7EDF7;color:var(--muted);font-size:12px}
+  .code .bar .dot{width:10px;height:10px;border-radius:50%}
+  .code pre{padding:13px 16px;overflow:auto;white-space:pre-wrap;word-break:break-word}
+  .add{color:#0a7a53;background:rgba(10,160,122,.13);display:block;border-left:2px solid var(--heal)}
+  .del{color:#b23145;background:rgba(216,70,90,.11);display:block;border-left:2px solid var(--drift)}
+  .add::before{content:"+ ";color:var(--heal)} .del::before{content:"− ";color:var(--drift)}
+  .ctx{color:var(--muted);display:block;padding-left:14px}
+  .tok{color:var(--stale);font-weight:700} .tok-new{color:var(--heal);font-weight:700}
+  .lbl{display:inline-flex;align-items:center;gap:7px;font:600 12px/1 var(--mono);color:var(--muted);letter-spacing:.05em;text-transform:uppercase}
+  .lbl .d{width:8px;height:8px;border-radius:50%}
+  ul.clean{list-style:none;display:flex;flex-direction:column;gap:11px}
+  ul.clean li{padding-left:24px;position:relative;color:var(--muted);font-size:16px;line-height:1.5}
+  ul.clean li::before{content:"▸";position:absolute;left:0;color:var(--heal)}
+  ul.clean li b{color:var(--text)}
+  .callout{border-left:3px solid var(--heal);padding:6px 0 6px 18px;color:var(--muted);font-size:15.5px;line-height:1.55}
+  .callout b{color:var(--text)} .callout.warn{border-color:var(--stale)} .callout.bad{border-color:var(--drift)} .callout.big{font-size:19px}
+  .flow{display:grid;grid-template-columns:1fr auto 1fr auto 1fr;gap:14px;align-items:stretch}
+  .flow .ar{align-self:center;color:var(--heal);font-size:26px}
+  .panel{background:var(--surface);border:1px solid var(--line);border-radius:14px;padding:22px 20px;text-align:center;display:flex;flex-direction:column;gap:8px}
+  .panel .n{font:700 12px/1 var(--mono);color:var(--faint);letter-spacing:.1em}
+  .panel .t{font-size:17px;font-weight:700}
+  .panel .d{color:var(--muted);font-size:14px;line-height:1.45}
+  .panel.good{border-color:var(--heal-dim);background:var(--heal-glow)}
+  .panel.bad{border-color:#E3A6AE;background:rgba(216,70,90,.07)}
+  .maps{display:grid;grid-template-columns:1fr auto 1fr;gap:22px;align-items:center}
+  .maplist{background:var(--surface);border:1px solid var(--line);border-radius:12px;padding:16px 18px}
+  .maplist .h{font:600 12px/1 var(--mono);color:var(--faint);letter-spacing:.06em;text-transform:uppercase;margin-bottom:12px}
+  .maplist .sym{font:14px/1.9 var(--mono);color:var(--muted);display:block}
+  .maplist .sym.match{color:var(--heal);font-weight:700} .maplist .sym.stale{color:var(--stale);font-weight:700}
+  .maparrow{display:flex;flex-direction:column;align-items:center;gap:6px;color:var(--heal)}
+  .maparrow .b{font-size:26px} .maparrow .l{font:600 11px/1.3 var(--mono);color:var(--faint);text-align:center;max-width:96px}
+  .step-pill{display:inline-flex;align-items:center;gap:10px;background:var(--surface);border:1px solid var(--line);border-radius:999px;padding:7px 15px;font:700 13px/1 var(--sans)}
+  .step-pill .num{font:700 12px/1 var(--mono);color:var(--heal);letter-spacing:.08em}
+  .stat{display:flex;flex-direction:column;gap:4px} .stat .v{font:800 clamp(30px,3.6vw,50px)/1 var(--sans);color:var(--heal);letter-spacing:-.02em}
+  .stat .k{font:600 12px/1.3 var(--mono);color:var(--muted)}
+  table.g{width:100%;border-collapse:collapse;font-size:15px}
+  table.g td{padding:12px 14px;border-bottom:1px solid var(--line);vertical-align:top}
+  table.g tr td:first-child{font:600 13.5px/1.4 var(--mono);color:var(--text);white-space:nowrap;width:36%}
+  table.g .go{color:var(--heal);font-weight:700} table.g .no{color:var(--stale);font-weight:700}
+  .grid2{display:grid;grid-template-columns:1fr 1fr;gap:18px}
+  .grid4{display:grid;grid-template-columns:repeat(4,1fr);gap:14px}
+  #s-hero,#s-close{background:#F5F8FD;padding:0;overflow:hidden}
+  #hero-canvas,#close-canvas{position:absolute;inset:0;width:100%;height:100%;display:block}
+  .hero-ui{position:absolute;inset:0;z-index:2;display:flex;flex-direction:column;justify-content:space-between;padding:clamp(28px,4vw,58px);pointer-events:none}
+  .hero-ui .top{display:flex;align-items:center;justify-content:space-between}
+  .hero-badge{font:600 12px/1 var(--mono);letter-spacing:.2em;text-transform:uppercase;color:var(--heal);border:1px solid var(--heal-dim);background:rgba(10,160,122,.10);border-radius:999px;padding:8px 14px}
+  .hero-ui h1{font-size:clamp(20px,2vw,28px);font-weight:700;margin-top:8px;color:var(--text)}
+  .hero-ui .sub{color:var(--muted);font:500 13px/1.5 var(--mono);margin-top:10px;max-width:56ch} .hero-ui .sub b{color:var(--text)}
+  .foot{position:fixed;bottom:16px;left:0;right:0;display:flex;align-items:center;justify-content:space-between;padding:0 clamp(24px,4vw,58px);z-index:20;pointer-events:none}
+  .foot .fb{font:600 12px/1 var(--mono);color:var(--faint);letter-spacing:.08em}
+  .dots{display:flex;gap:6px;pointer-events:auto;flex-wrap:wrap;max-width:60%;justify-content:center}
+  .dots i{width:7px;height:7px;border-radius:50%;background:var(--line);cursor:pointer;transition:.2s}
+  .dots i.on{background:var(--heal);transform:scale(1.3)}
+  .prog{position:fixed;top:0;left:0;height:3px;background:var(--heal);z-index:30;transition:width .35s ease;box-shadow:0 0 12px var(--heal)}
+  @media print{body,.deck{height:auto;overflow:visible}.slide{display:flex!important;opacity:1!important;position:relative;height:100vh;page-break-after:always;inset:auto}.foot,.prog,.dots{display:none}}
+</style>
+</head>
+<body>
+<div class="prog" id="prog"></div>
+<div class="deck" id="deck">
+
+  <!-- 1 · HERO -->
+  <section class="slide" id="s-hero">
+    <canvas id="hero-canvas"></canvas>
+    <div class="hero-ui">
+      <div class="top">
+        <div class="brand"><div class="mark"><svg viewBox="0 0 48 48" fill="none">
+          <path d="M24 3l16 6v11c0 11-7 19-16 24C15 39 8 31 8 20V9l16-6z" fill="#FFFFFF" stroke="#0AA07A" stroke-width="1.6"/>
+          <path d="M15 25h5l3-8 4 14 3-8h3" stroke="#0AA07A" stroke-width="2.2" fill="none" stroke-linecap="round" stroke-linejoin="round"/></svg></div>
+          <span class="wm" style="color:var(--text)">Doc<b>Guard</b> · Tests</span></div>
+        <div class="hero-badge">Proposal · Test Mode</div>
+      </div>
+      <div class="bot">
+        <div class="eyebrow">The same engine, a new target</div>
+        <h1>You refactor. <span style="color:var(--drift)">Red</span> tests everywhere. Most of the fix is mindless. DocGuard does the mindless part.</h1>
+        <p class="sub"><b>Right-click + drag</b> to scatter the particles · press <b>→</b> to begin.</p>
+      </div>
+    </div>
+  </section>
+
+  <!-- 2 · 10-SECOND VERSION -->
+  <section class="slide dark center">
+    <div class="kicker"><span class="eyebrow">The idea in 10 seconds</span><span class="n">/ 02</span></div>
+    <h2>You refactor. Tests break. Most of the fixing is toil.</h2>
+    <div class="flow mt-l">
+      <div class="panel"><span class="n">STEP 1</span><span class="t">You rename something</span><span class="d">e.g. a parameter <span class="tok">role</span> → <span class="tok-new">userRole</span>.</span></div>
+      <div class="ar">→</div>
+      <div class="panel bad"><span class="n">STEP 2</span><span class="t" style="color:var(--drift)">12 tests go red</span><span class="d">They still call <span class="tok">role</span>. None of it is a real bug — just broken plumbing.</span></div>
+      <div class="ar">→</div>
+      <div class="panel good"><span class="n">STEP 3</span><span class="t" style="color:var(--heal)">DocGuard fixes the calls</span><span class="d">Updates the call sites, re-runs → green, opens a PR you review.</span></div>
+    </div>
+    <p class="lede mt-l">Same 5-step engine as the docs version — pointed at your test suite instead of your docs.</p>
+  </section>
+
+  <!-- 3 · THE CRUCIAL DISTINCTION -->
+  <section class="slide dark center">
+    <div class="kicker"><span class="eyebrow">The one thing that makes tests different</span><span class="n">/ 03</span></div>
+    <h2>A red test means one of two things.</h2>
+    <div class="grid2 mt-l">
+      <div class="card" style="border-color:var(--heal-dim)"><div class="lbl"><span class="d" style="background:var(--heal)"></span> the code got better</div>
+        <h3 class="mt-s" style="color:var(--heal)">The change was intended</h3><p>The test is now outdated. It should be updated to match the new, correct behavior.</p></div>
+      <div class="card" style="border-color:#E3A6AE"><div class="lbl"><span class="d" style="background:var(--drift)"></span> the code got worse</div>
+        <h3 class="mt-s" style="color:var(--drift)">It's a bug</h3><p>The test just did its job and caught it. You must <b>not</b> “fix” the test — you fix the code.</p></div>
+    </div>
+    <div class="callout mt-l big">To a machine, these look <b>identical</b> — a red test. Telling them apart is the whole game.</div>
+  </section>
+
+  <!-- 4 · THE TRAP -->
+  <section class="slide dark center">
+    <div class="kicker"><span class="eyebrow">Why the naïve version is dangerous</span><span class="n">/ 04</span></div>
+    <div class="big">Auto-editing a test to make it pass<br/>is a <span style="color:var(--drift)">rubber stamp for bugs</span>.</div>
+    <p class="lede mt-l">If a tool changes a failing test until it goes green, you've built a test that <em>always agrees with the code</em> — so it can never catch a regression. That's worse than no test: it's false confidence.</p>
+    <div class="callout bad mt-l big">A test that can't disagree with the code is not a test.</div>
+  </section>
+
+  <!-- 5 · THE RULE -->
+  <section class="slide dark center">
+    <div class="kicker"><span class="eyebrow">The rule that makes it safe</span><span class="n">/ 05</span></div>
+    <h2>Fix the plumbing. Never touch the verdict.</h2>
+    <div class="flow mt-l">
+      <div class="panel good"><span class="n">ARRANGE</span><span class="t">set up data &amp; fixtures</span><span class="d" style="color:var(--heal)">→ automate</span></div>
+      <div class="ar">›</div>
+      <div class="panel good"><span class="n">ACT</span><span class="t">call the code</span><span class="d" style="color:var(--heal)">→ automate</span></div>
+      <div class="ar">›</div>
+      <div class="panel"><span class="n">ASSERT</span><span class="t" style="color:var(--stale)">what's correct</span><span class="d" style="color:var(--stale)">→ human decides</span></div>
+    </div>
+    <div class="callout mt-l big">DocGuard changes <b>how a test calls your code</b>. It never decides <b>what “correct” means</b> — that's the human's job.</div>
+  </section>
+
+  <!-- 6 · PIPELINE RETARGETED -->
+  <section class="slide dark">
+    <div class="kicker"><span class="eyebrow">The engine, pointed at tests</span><span class="n">/ 06</span></div>
+    <h2>The same five steps.</h2>
+    <div class="grow" style="display:flex;flex-direction:column;justify-content:center;gap:16px">
+      <div class="row" style="gap:14px">
+        <div class="card col"><span class="num">01</span><h3 class="mt-s">Detect</h3><p>Parse the diff → param <span class="tok">role</span> renamed to <span class="tok-new">userRole</span>.</p></div>
+        <div class="card col"><span class="num">02</span><h3 class="mt-s">Map</h3><p>Which tests call it? Via <b>imports + coverage</b>.</p></div>
+        <div class="card col"><span class="num">03</span><h3 class="mt-s">Verify</h3><p><b>Run them.</b> Red because of the rename — not a bug.</p></div>
+      </div>
+      <div class="row" style="gap:14px;max-width:66%">
+        <div class="card col"><span class="num">04</span><h3 class="mt-s">Repair</h3><p>Update the <b>call sites</b> only. Assertions untouched.</p></div>
+        <div class="card col"><span class="num">05</span><h3 class="mt-s">Gate</h3><p>Re-run → green → PR. Ambiguous → <b style="color:var(--stale)">human</b>.</p></div>
+      </div>
+    </div>
+  </section>
+
+  <!-- 7 · MAP IS STRONGER -->
+  <section class="slide dark">
+    <div class="kicker"><span class="eyebrow">Why it's better than the docs case · 1</span><span class="n">/ 07</span></div>
+    <h2>The map isn't a guess — it's the call graph.</h2>
+    <div class="maps mt-l grow" style="align-items:center">
+      <div class="maplist"><div class="h">docs → code (fuzzy)</div>
+        <span class="sym">“the auth helper”…</span><span class="sym">inferred from prose</span><span class="sym stale">names may not match</span></div>
+      <div class="maparrow"><span class="b">vs</span><span class="l">tests are explicit</span></div>
+      <div class="maplist"><div class="h">tests → code (exact)</div>
+        <span class="sym match">import { createUser }</span><span class="sym match">createUser(role=…)</span><span class="sym match">coverage: lines 12–40</span></div>
+    </div>
+    <div class="callout mt-l">Tests <b>import and call</b> your code by name. Add <b>coverage data</b> — run once, and you know exactly which tests execute the changed lines. Precision docs can only dream of.</div>
+  </section>
+
+  <!-- 8 · VERIFY IS STRONGER -->
+  <section class="slide dark center">
+    <div class="kicker"><span class="eyebrow">Why it's better than the docs case · 2</span><span class="n">/ 08</span></div>
+    <h2>And the checker is free and perfect: run the test.</h2>
+    <div class="grid2 mt-l">
+      <div class="card"><div class="lbl"><span class="d" style="background:var(--stale)"></span> docs · verify</div><p>“Is this paragraph stale?” needs a <b>judgment call</b> (an LLM, a heuristic).</p></div>
+      <div class="card" style="border-color:var(--heal-dim)"><div class="lbl"><span class="d" style="background:var(--heal)"></span> tests · verify</div><p><span style="color:var(--drift)">red</span> → <span style="color:var(--heal)">green</span> is <b>ground truth</b>. The suite tells you objectively whether the fix worked.</p></div>
+    </div>
+    <div class="callout mt-l big">The test suite is the oracle. DocGuard just drives it — and only keeps a fix that turns red to green.</div>
+  </section>
+
+  <!-- 9 · SAFE ZONE -->
+  <section class="slide dark">
+    <div class="kicker"><span class="eyebrow">What it auto-fixes</span><span class="n">/ 09</span></div>
+    <h2>The safe zone: mechanical churn.</h2>
+    <div class="grid4 mt-l">
+      <div class="card"><span class="ic" style="color:var(--heal);font:700 18px/1 var(--mono)">↻</span><h3 class="mt-s">Renames</h3><p>function · param · class · method</p></div>
+      <div class="card"><span class="ic" style="color:var(--heal);font:700 18px/1 var(--mono)">( )</span><h3 class="mt-s">Signatures</h3><p>arg added / removed / reordered, new defaults</p></div>
+      <div class="card"><span class="ic" style="color:var(--heal);font:700 18px/1 var(--mono)">⇢</span><h3 class="mt-s">Imports</h3><p>moved or renamed modules &amp; paths</p></div>
+      <div class="card"><span class="ic" style="color:var(--heal);font:700 18px/1 var(--mono)">▤</span><h3 class="mt-s">Fixtures</h3><p>factory / schema drift — a new required field</p></div>
+    </div>
+    <div class="callout mt-l big">The stuff that breaks 20 tests and costs an afternoon of find-and-replace — with <b>zero</b> judgment.</div>
+  </section>
+
+  <!-- 10 · WORKED EXAMPLE -->
+  <section class="slide dark">
+    <div class="kicker"><span class="eyebrow">A mechanical fix, end to end</span><span class="n">/ 10</span></div>
+    <h2>Rename <span class="tok">role</span> → <span class="tok-new">userRole</span>. 12 tests, 0 assertions touched.</h2>
+    <div class="row mt-l grow" style="align-items:center">
+      <div class="col code"><div class="bar"><span class="dot" style="background:#d8465a"></span><span style="margin-left:4px">test_users.py · RED</span></div>
+        <pre><span class="ctx" style="padding-left:0">def test_create_admin():</span><span class="del">    u = create_user(role="admin")</span><span class="ctx" style="padding-left:0">    assert u.is_admin is True</span><span class="ctx" style="padding-left:0"></span><span class="ctx" style="padding-left:0"># TypeError: unexpected keyword 'role'</span></pre></div>
+      <div class="col code"><div class="bar"><span class="dot" style="background:#0aa07a"></span><span style="margin-left:4px">test_users.py · DocGuard fix → GREEN</span></div>
+        <pre><span class="ctx" style="padding-left:0">def test_create_admin():</span><span class="add">    u = create_user(userRole="admin")</span><span class="ctx" style="padding-left:0">    assert u.is_admin is True   ← untouched</span><span class="ctx" style="padding-left:0"></span><span class="ctx" style="padding-left:0"># ✓ passes</span></pre></div>
+    </div>
+    <div class="callout mt-l">Only the <b>call</b> changed. The assertion — the part that says what's <em>correct</em> — is byte-identical.</div>
+  </section>
+
+  <!-- 11 · WHAT IT NEVER TOUCHES -->
+  <section class="slide dark">
+    <div class="kicker"><span class="eyebrow">The guardrail</span><span class="n">/ 11</span></div>
+    <h2>What it will never quietly change: the assertion.</h2>
+    <div class="row mt-l grow" style="align-items:center">
+      <div class="col code"><div class="bar"><span class="dot" style="background:#d8465a"></span><span style="margin-left:4px">a discount changed 10% → 15% … bug, or intended?</span></div>
+        <pre><span class="ctx" style="padding-left:0">def test_total():</span><span class="ctx" style="padding-left:0">    t = checkout(price=100)</span><span class="del">    assert t == 90     # now fails: got 85</span></pre></div>
+      <div class="col">
+        <ul class="clean">
+          <li>DocGuard does <b>NOT</b> change <span class="tok">90</span> → <span class="tok-new">85</span></li>
+          <li>Changing an expected value is a decision about <b>correctness</b></li>
+          <li>It flags: <em>“behavior changed 10%→15% — intended? If yes, I'll update the expected value.”</em></li>
+        </ul>
+        <div class="callout bad mt-l">That's a human's call. The engine escalates it — it never rubber-stamps it.</div>
+      </div>
+    </div>
+  </section>
+
+  <!-- 12 · THE GATE -->
+  <section class="slide dark">
+    <div class="kicker"><span class="eyebrow">The gate, sharpened</span><span class="n">/ 12</span></div>
+    <h2>The failure <em>type</em> decides the action.</h2>
+    <table class="g mt-l">
+      <tr><td>Compile / reference / import error</td><td>a rename or moved module — mechanical</td><td class="go">→ AUTO-FIX</td></tr>
+      <tr><td>Fixture missing a required field</td><td>schema drift — mechanical</td><td class="go">→ AUTO-FIX</td></tr>
+      <tr><td>Assertion value mismatch</td><td>could be a bug — ambiguous</td><td class="no">→ HUMAN REVIEW</td></tr>
+      <tr><td>New behavior, no test at all</td><td>a coverage gap</td><td class="no">→ SUGGEST, human writes</td></tr>
+    </table>
+    <div class="callout mt-l">Cleaner than the docs gate — because <b>compile + run signals</b> give you a certainty prose never can.</div>
+  </section>
+
+  <!-- 13 · EFFICIENCY THESIS -->
+  <section class="slide dark center">
+    <div class="kicker"><span class="eyebrow">Why this is the efficient way</span><span class="n">/ 13</span></div>
+    <h2>Automate up to the boundary of judgment — and stop.</h2>
+    <div class="row mt-l">
+      <div class="col card" style="border-color:var(--heal-dim)"><div class="lbl"><span class="d" style="background:var(--heal)"></span> Precision</div><p>The map is <b>imports + coverage</b> — empirical, not inferred.</p></div>
+      <div class="col card" style="border-color:var(--heal-dim)"><div class="lbl"><span class="d" style="background:var(--heal)"></span> Trust</div><p>The verifier is the <b>test runner</b> — an oracle, deterministic and free.</p></div>
+      <div class="col card" style="border-color:var(--heal-dim)"><div class="lbl"><span class="d" style="background:var(--heal)"></span> Safety</div><p>Mechanics automated, intent human-gated → <b>can't rubber-stamp a regression</b>.</p></div>
+    </div>
+    <div class="callout mt-l big">Test maintenance is mostly mechanical churn. This removes exactly that — with more precision and a better checker than docs allow — and structurally refuses to touch the part that requires a human.</div>
+  </section>
+
+  <!-- 14 · UNIVERSAL -->
+  <section class="slide dark">
+    <div class="kicker"><span class="eyebrow">Same engine, every stack</span><span class="n">/ 14</span></div>
+    <h2>The parser and gate already exist. Add test runners.</h2>
+    <div class="row mt-l" style="gap:18px">
+      <div class="col stat"><div class="v">4</div><div class="k">languages · py · ts · js · java</div></div>
+      <div class="col stat"><div class="v">3+</div><div class="k">runners · pytest · jest/vitest · junit</div></div>
+      <div class="col stat"><div class="v">1</div><div class="k">CI check, every PR</div></div>
+      <div class="col stat"><div class="v">0</div><div class="k">assertions edited without a human</div></div>
+    </div>
+    <div class="callout mt-l">The multi-language parser, rename/signature detection, symbol mapping, surgical repair and the confidence gate are <b>already built</b> for docs. Tests reuse all of it.</div>
+  </section>
+
+  <!-- 15 · HONEST STATUS -->
+  <section class="slide dark center">
+    <div class="kicker"><span class="eyebrow">Honest status</span><span class="n">/ 15</span></div>
+    <h2>A proposal — built on a real engine.</h2>
+    <div class="grid2 mt-l">
+      <div class="card" style="border-color:var(--heal-dim)"><div class="lbl"><span class="d" style="background:var(--heal)"></span> already real in DocGuard</div>
+        <ul class="clean mt-s"><li>Multi-language parser (py/ts/js/java)</li><li>Rename &amp; signature-change detection</li><li>Symbol mapping + confidence gate</li><li>Surgical, byte-preserving repair</li></ul></div>
+      <div class="card" style="border-color:#E3C089"><div class="lbl"><span class="d" style="background:var(--stale)"></span> new for tests</div>
+        <ul class="clean mt-s"><li>Test runner as the verifier</li><li>Coverage-based code↔test map</li><li>Call-site vs. assertion split</li><li>Framework adapters (pytest / jest / junit)</li></ul></div>
+    </div>
+    <div class="callout mt-l big">The hard parts already exist. This points them at a new, higher-leverage target.</div>
+  </section>
+
+  <!-- 16 · CLOSE -->
+  <section class="slide" id="s-close">
+    <canvas id="close-canvas"></canvas>
+    <div class="hero-ui" style="justify-content:center;align-items:flex-start">
+      <div>
+        <div class="eyebrow">DocGuard · Tests</div>
+        <h1 style="font-size:clamp(26px,3vw,44px);max-width:22ch;margin-top:10px;color:var(--text);line-height:1.1">Fix the plumbing automatically. Leave the judgment to a human.</h1>
+        <p class="sub" style="font-size:14px">Detect · map · verify (run it) · repair the call · gate — in four languages, in your existing CI.</p>
+      </div>
+    </div>
+  </section>
+
+</div>
+
+<div class="foot">
+  <div class="fb">Doc<span style="color:var(--heal)">Guard</span> · Tests</div>
+  <div class="dots" id="dots"></div>
+  <div class="fb" id="fb-r">01 / 16</div>
+</div>
+
+<script>
+/* Particle text engine — ported from the pasted particle-text-effect.tsx to framework-free JS (light-tuned). */
+function initParticleText(canvas, words){
+  const pixelSteps = 6;
+  const PALETTE = [[10,160,122],[38,98,235],[124,58,237],[184,116,24],[214,66,88],[13,140,118]];
+  const mouse = {x:0,y:0,isPressed:false,isRightClick:false};
+  let particles = [], frame = 0, wordIndex = 0, raf = null, running = false;
+  function randPos(x,y,mag){const rx=Math.random()*canvas.width,ry=Math.random()*canvas.height;let dx=rx-x,dy=ry-y;const m=Math.hypot(dx,dy);if(m>0){dx=dx/m*mag;dy=dy/m*mag;}return {x:x+dx,y:y+dy};}
+  function mk(){return {pos:{x:0,y:0},vel:{x:0,y:0},acc:{x:0,y:0},target:{x:0,y:0},closeEnough:100,maxSpeed:1,maxForce:.1,size:10,killed:false,startColor:{r:0,g:0,b:0},targetColor:{r:0,g:0,b:0},cw:0,blend:.01};}
+  function move(p){let prox=1;const d=Math.hypot(p.pos.x-p.target.x,p.pos.y-p.target.y);if(d<p.closeEnough)prox=d/p.closeEnough;let tx=p.target.x-p.pos.x,ty=p.target.y-p.pos.y;const m=Math.hypot(tx,ty);if(m>0){tx=tx/m*p.maxSpeed*prox;ty=ty/m*p.maxSpeed*prox;}let sx=tx-p.vel.x,sy=ty-p.vel.y;const sm=Math.hypot(sx,sy);if(sm>0){sx=sx/sm*p.maxForce;sy=sy/sm*p.maxForce;}p.acc.x+=sx;p.acc.y+=sy;p.vel.x+=p.acc.x;p.vel.y+=p.acc.y;p.pos.x+=p.vel.x;p.pos.y+=p.vel.y;p.acc.x=0;p.acc.y=0;}
+  function draw(ctx,p){if(p.cw<1)p.cw=Math.min(p.cw+p.blend,1);const c={r:Math.round(p.startColor.r+(p.targetColor.r-p.startColor.r)*p.cw),g:Math.round(p.startColor.g+(p.targetColor.g-p.startColor.g)*p.cw),b:Math.round(p.startColor.b+(p.targetColor.b-p.startColor.b)*p.cw)};ctx.fillStyle=`rgb(${c.r},${c.g},${c.b})`;ctx.fillRect(p.pos.x,p.pos.y,2.4,2.4);}
+  function kill(p){if(p.killed)return;const r=randPos(canvas.width/2,canvas.height/2,(canvas.width+canvas.height)/2);p.target.x=r.x;p.target.y=r.y;p.startColor={r:p.startColor.r+(p.targetColor.r-p.startColor.r)*p.cw,g:p.startColor.g+(p.targetColor.g-p.startColor.g)*p.cw,b:p.startColor.b+(p.targetColor.b-p.startColor.b)*p.cw};p.targetColor={r:0,g:0,b:0};p.cw=0;p.killed=true;}
+  function nextWord(word){const off=document.createElement("canvas");off.width=canvas.width;off.height=canvas.height;const octx=off.getContext("2d");octx.fillStyle="white";let fs=Math.round(canvas.height*0.34);octx.font=`bold ${fs}px Arial`;while(octx.measureText(word).width>canvas.width*0.86&&fs>24){fs-=4;octx.font=`bold ${fs}px Arial`;}octx.textAlign="center";octx.textBaseline="middle";octx.fillText(word,canvas.width/2,canvas.height/2);const px=octx.getImageData(0,0,canvas.width,canvas.height).data;const nc=PALETTE[Math.floor(Math.random()*PALETTE.length)];const newColor={r:nc[0],g:nc[1],b:nc[2]};let pi=0;const idx=[];for(let i=0;i<px.length;i+=pixelSteps*4)idx.push(i);for(let i=idx.length-1;i>0;i--){const j=Math.floor(Math.random()*(i+1));[idx[i],idx[j]]=[idx[j],idx[i]];}for(const ci of idx){if(px[ci+3]>0){const x=(ci/4)%canvas.width,y=Math.floor(ci/4/canvas.width);let p;if(pi<particles.length){p=particles[pi];p.killed=false;pi++;}else{p=mk();const r=randPos(canvas.width/2,canvas.height/2,(canvas.width+canvas.height)/2);p.pos.x=r.x;p.pos.y=r.y;p.maxSpeed=Math.random()*6+4;p.maxForce=p.maxSpeed*.05;p.size=Math.random()*6+6;p.blend=Math.random()*.0275+.0025;particles.push(p);}p.startColor={r:p.startColor.r+(p.targetColor.r-p.startColor.r)*p.cw,g:p.startColor.g+(p.targetColor.g-p.startColor.g)*p.cw,b:p.startColor.b+(p.targetColor.b-p.startColor.b)*p.cw};p.targetColor=newColor;p.cw=0;p.target.x=x;p.target.y=y;}}for(let i=pi;i<particles.length;i++)kill(particles[i]);}
+  function loop(){const ctx=canvas.getContext("2d");ctx.fillStyle="rgba(245,248,253,0.16)";ctx.fillRect(0,0,canvas.width,canvas.height);for(let i=particles.length-1;i>=0;i--){const p=particles[i];move(p);draw(ctx,p);if(p.killed&&(p.pos.x<0||p.pos.x>canvas.width||p.pos.y<0||p.pos.y>canvas.height))particles.splice(i,1);}if(mouse.isPressed&&mouse.isRightClick){particles.forEach(p=>{if(Math.hypot(p.pos.x-mouse.x,p.pos.y-mouse.y)<50)kill(p);});}frame++;if(frame%220===0){wordIndex=(wordIndex+1)%words.length;nextWord(words[wordIndex]);}raf=requestAnimationFrame(loop);}
+  function size(){const r=canvas.getBoundingClientRect();canvas.width=Math.max(640,Math.floor(r.width));canvas.height=Math.max(360,Math.floor(r.height));}
+  canvas.addEventListener("mousedown",e=>{mouse.isPressed=true;mouse.isRightClick=e.button===2;const r=canvas.getBoundingClientRect();mouse.x=(e.clientX-r.left)*(canvas.width/r.width);mouse.y=(e.clientY-r.top)*(canvas.height/r.height);});
+  canvas.addEventListener("mousemove",e=>{const r=canvas.getBoundingClientRect();mouse.x=(e.clientX-r.left)*(canvas.width/r.width);mouse.y=(e.clientY-r.top)*(canvas.height/r.height);});
+  canvas.addEventListener("mouseup",()=>{mouse.isPressed=false;mouse.isRightClick=false;});
+  canvas.addEventListener("contextmenu",e=>e.preventDefault());
+  return {start(){if(running)return;running=true;size();if(particles.length===0){wordIndex=0;nextWord(words[0]);}loop();},stop(){running=false;if(raf)cancelAnimationFrame(raf);raf=null;}};
+}
+const slides=[...document.querySelectorAll('.slide')];
+const dots=document.getElementById('dots'),prog=document.getElementById('prog'),fbR=document.getElementById('fb-r');
+let i=0;
+slides.forEach((_,k)=>{const d=document.createElement('i');d.onclick=()=>go(k);dots.appendChild(d);});
+const dEls=[...dots.children];
+const hero=initParticleText(document.getElementById('hero-canvas'),["TESTS","renamed","red","green","AUTO-FIXED","DocGuard"]);
+const close=initParticleText(document.getElementById('close-canvas'),["SAME","ENGINE","for TESTS","red → green","DocGuard"]);
+function go(n){
+  i=Math.max(0,Math.min(slides.length-1,n));
+  slides.forEach((s,k)=>s.classList.toggle('on',k===i));
+  dEls.forEach((d,k)=>d.classList.toggle('on',k===i));
+  prog.style.width=((i+1)/slides.length*100)+'%';
+  fbR.textContent=String(i+1).padStart(2,'0')+' / '+String(slides.length).padStart(2,'0');
+  if(slides[i].id==='s-hero')hero.start();else hero.stop();
+  if(slides[i].id==='s-close')close.start();else close.stop();
+}
+document.addEventListener('keydown',e=>{
+  if(e.key==='ArrowRight'||e.key===' '||e.key==='PageDown'){e.preventDefault();go(i+1);}
+  else if(e.key==='ArrowLeft'||e.key==='PageUp'){e.preventDefault();go(i-1);}
+  else if(e.key==='Home')go(0);else if(e.key==='End')go(slides.length-1);
+  else if(e.key==='f'||e.key==='F'){document.fullscreenElement?document.exitFullscreen():document.documentElement.requestFullscreen();}
+  else if(e.key==='p'||e.key==='P')window.print();
+});
+let sx=0;addEventListener('touchstart',e=>sx=e.touches[0].clientX,{passive:true});
+addEventListener('touchend',e=>{const dx=e.changedTouches[0].clientX-sx;if(Math.abs(dx)>50)go(i+(dx<0?1:-1));},{passive:true});
+addEventListener('resize',()=>{if(slides[i].id==='s-hero'){hero.stop();hero.start();}if(slides[i].id==='s-close'){close.stop();close.start();}});
+go(0);
+</script>
+</body>
+</html>
