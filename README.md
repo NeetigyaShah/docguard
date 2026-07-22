@@ -164,9 +164,37 @@ the mock oracle:
 | 3 | 0 | 0 | 4 | 1.00 | 1.00 | 1.00 |
 
 These are computed from executed fixtures, not asserted. They measure the
-pipeline + rule-based oracle on a controlled set (rename / default / removal vs
-whitespace / comment / refactor / unrelated); a real LLM would be scored the same
-way on a larger corpus.
+pipeline + rule-based oracle on a *controlled* set (rename / default / removal vs
+whitespace / comment / refactor / unrelated). **They are not a claim about
+arbitrary real repos** — see below.
+
+## Real-world evaluation (honest)
+
+Run against real clones of **Pydantic** and **FastAPI** (real code, real Markdown
+docs, real git diffs) via `scripts/eval_realrepo.py` and `scripts/real_case_demo.py`:
+
+- **No false positives.** Negative controls (comment-only edits) were flagged
+  stale **0 times** by both providers on both repos. It won't spam bad PRs.
+- **Hand-verified real case** — Pydantic `Field(frozen=…)` (documented in
+  `docs/concepts/fields.md` § Immutability), parameter renamed `frozen → is_frozen`:
+  - **mock**: ✅ flags stale (0.92) **and** emits a correct surgical fix
+    (`` `frozen` `` → `` `is_frozen` ``, rest byte-identical).
+  - **real LLM** (DeepSeek-v4 via an OpenAI-compatible endpoint): ✅ flags stale
+    (1.0) with correct reasoning; the **repair step returned no change** on the
+    long prose section — detection is solid, the LLM *repair* path needs hardening.
+- **Mock recall on real repos is low.** The deterministic mock only matches
+  structural tokens (an old param/default/symbol that literally appears in a
+  mapped doc), so it misses most staleness — it is a **high-precision structural
+  baseline, not a semantic detector**. A real LLM is required for semantic cases.
+- **Automated repo-wide recall numbers are unreliable** because auto-discovering
+  "documented" symbols by word-match over-counts (a name *mentioned* in a tutorial
+  ≠ that function being *documented*). Meaningful recall needs curated labels or a
+  stronger mapping model. This is an honest limitation, not a hidden one.
+- **The free LLM endpoint used was slow** (~30–70 s/call), so large CI runs need a
+  faster provider.
+
+Reproduce: `python scripts/real_case_demo.py` (set `DOCGUARD_LLM_PROVIDER=openai`
++ key for the real-LLM column).
 
 ## Limitations
 

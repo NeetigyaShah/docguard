@@ -22,3 +22,4 @@
 {"ts": "2026-07-22T10:26:50Z", "actor": "orchestrator", "feature": "phase-4", "action": "milestone suite (13 serial)", "result": "13/13 PASS", "commit": ""}
 {"ts": "2026-07-22T10:26:50Z", "actor": "orchestrator", "feature": "phase-5", "action": "milestone suite (11 serial)", "result": "11/11 PASS", "commit": ""}
 {"ts": "2026-07-22T10:26:58Z", "actor": "orchestrator", "feature": "phase-6", "action": "milestone suite (10 serial)", "result": "10/10 PASS", "commit": ""}
+{"ts": "2026-07-22T12:01:58Z", "actor": "orchestrator", "feature": "F004,eval", "action": "Real-LLM integration + real-repo evaluation (Pydantic/FastAPI)", "result": "openai base_url support; real case verified stale by mock+LLM; honest recall findings", "commit": ""}

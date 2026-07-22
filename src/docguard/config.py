@@ -26,6 +26,8 @@ class Settings(BaseSettings):
     openai_model: str = "gpt-4o-mini"
     anthropic_model: str = "claude-sonnet-5"
     openai_embed_model: str = "text-embedding-3-small"
+    # optional OpenAI-compatible endpoint (e.g. NVIDIA / together / local vLLM)
+    openai_base_url: str = ""
 
     # mapping
     similarity_threshold: float = 0.35

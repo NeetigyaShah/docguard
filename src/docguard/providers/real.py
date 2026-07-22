@@ -109,16 +109,23 @@ class OpenAILLM(_JsonLLM):
         super().__init__()
         from openai import OpenAI
 
-        self._client = OpenAI(api_key=settings.openai_api_key or None)
+        self._client = OpenAI(
+            api_key=settings.openai_api_key or None,
+            base_url=settings.openai_base_url or None,
+        )
         self._model = settings.openai_model
 
     def _complete(self, system: str, user: str) -> str:  # pragma: no cover - needs key
-        resp = self._client.chat.completions.create(
-            model=self._model,
-            messages=[{"role": "system", "content": system}, {"role": "user", "content": user}],
-            temperature=0,
-            response_format={"type": "json_object"},
-        )
+        msgs: list = [{"role": "system", "content": system}, {"role": "user", "content": user}]
+        try:
+            resp = self._client.chat.completions.create(
+                model=self._model, messages=msgs, temperature=0,
+                response_format={"type": "json_object"}, max_tokens=2048,
+            )
+        except Exception:  # some OpenAI-compatible endpoints reject response_format
+            resp = self._client.chat.completions.create(
+                model=self._model, messages=msgs, temperature=0, max_tokens=2048,
+            )
         return resp.choices[0].message.content or "{}"
 
 
