@@ -629,6 +629,106 @@
       "expected": "True",
       "actual": "True",
       "status": "PASS"
+    },
+    {
+      "id": "P6-01",
+      "phase": 6,
+      "kind": "predefined",
+      "description": "High-confidence auto-fix scenario",
+      "input": "rename role->user_role",
+      "expected": "(True, True, True)",
+      "actual": "(True, True, True)",
+      "status": "PASS"
+    },
+    {
+      "id": "P6-02",
+      "phase": 6,
+      "kind": "predefined",
+      "description": "Medium-confidence human-review scenario",
+      "input": "delete remove_member",
+      "expected": "(True, True)",
+      "actual": "(True, True)",
+      "status": "PASS"
+    },
+    {
+      "id": "P6-03",
+      "phase": 6,
+      "kind": "predefined",
+      "description": "No-staleness scenario (internal refactor)",
+      "input": "rewrite body",
+      "expected": "0",
+      "actual": "0",
+      "status": "PASS"
+    },
+    {
+      "id": "P6-04",
+      "phase": 6,
+      "kind": "predefined",
+      "description": "Unrelated code change scenario (new private helper)",
+      "input": "add _internal_helper",
+      "expected": "(0, 0)",
+      "actual": "(0, 0)",
+      "status": "PASS"
+    },
+    {
+      "id": "P6-05",
+      "phase": 6,
+      "kind": "predefined",
+      "description": "Multiple affected documentation sections",
+      "input": "rename + delete",
+      "expected": "True",
+      "actual": "True",
+      "status": "PASS"
+    },
+    {
+      "id": "P6-06",
+      "phase": 6,
+      "kind": "predefined",
+      "description": "Failure/recovery: bad base ref does not crash",
+      "input": "base=NONEXISTENT",
+      "expected": "True",
+      "actual": "True",
+      "status": "PASS"
+    },
+    {
+      "id": "P6-07",
+      "phase": 6,
+      "kind": "orchestrator",
+      "description": "[metrics] measured confusion over labelled fixtures",
+      "input": "compute_metrics",
+      "expected": "(3, 0, 0, 4)",
+      "actual": "(3, 0, 0, 4)",
+      "status": "PASS"
+    },
+    {
+      "id": "P6-08",
+      "phase": 6,
+      "kind": "orchestrator",
+      "description": "[metrics] precision/recall/F1 == 1.0 on fixture set",
+      "input": "compute_metrics",
+      "expected": "(1.0, 1.0, 1.0)",
+      "actual": "(1.0, 1.0, 1.0)",
+      "status": "PASS"
+    },
+    {
+      "id": "P6-09",
+      "phase": 6,
+      "kind": "orchestrator",
+      "description": "[regression] analysis is deterministic across runs",
+      "input": "run twice",
+      "expected": "True",
+      "actual": "True",
+      "status": "PASS"
+    },
+    {
+      "id": "P6-10",
+      "phase": 6,
+      "kind": "orchestrator",
+      "description": "[edge] default-only change auto-fixes",
+      "input": "viewer->member",
+      "expected": "True",
+      "actual": "True",
+      "status": "PASS"
     }
   ]
 }
