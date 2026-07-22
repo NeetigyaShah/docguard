@@ -10,3 +10,6 @@
 {"ts": "2026-07-22T10:04:03Z", "actor": "orchestrator", "feature": "phase-4", "action": "milestone suite (13 serial)", "result": "12/13 PASS", "commit": ""}
 {"ts": "2026-07-22T10:04:21Z", "actor": "orchestrator", "feature": "phase-4", "action": "milestone suite (13 serial)", "result": "13/13 PASS", "commit": ""}
 {"ts": "2026-07-22T10:05:08Z", "actor": "orchestrator", "feature": "F040-F042", "action": "Phase 4 repair+validate+confidence + milestone", "result": "68 pytest pass; milestone 13/13; ruff clean", "commit": ""}
+{"ts": "2026-07-22T10:11:05Z", "actor": "orchestrator", "feature": "phase-5", "action": "milestone suite (11 serial)", "result": "11/11 PASS", "commit": ""}
+{"ts": "2026-07-22T10:13:04Z", "actor": "orchestrator", "feature": "F051", "action": "docker build + CLI smoke", "result": "PASS: image built, CLI works", "commit": ""}
+{"ts": "2026-07-22T10:14:01Z", "actor": "orchestrator", "feature": "F050-F061", "action": "Phase 5 GitHub Action + pipeline + CLI + milestone", "result": "79 pytest pass; milestone 12/12; docker build+CLI verified", "commit": ""}

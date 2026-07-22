@@ -1,0 +1,32 @@
+name: "DocGuard"
+description: "Self-healing technical documentation — detect stale docs from code changes and open a fix PR or review comment."
+branding:
+  icon: "book-open"
+  color: "purple"
+
+inputs:
+  llm-provider:
+    description: "LLM provider: mock | openai | anthropic"
+    default: "mock"
+  embedding-provider:
+    description: "Embedding provider: mock | openai"
+    default: "mock"
+  confidence-threshold:
+    description: "High-confidence threshold (0..1) for auto-fix"
+    default: "0.85"
+  auto-fix:
+    description: "Open a docs-fix PR for high-confidence corrections"
+    default: "false"
+  docs-paths:
+    description: "Comma-separated documentation paths"
+    default: "docs"
+  src-paths:
+    description: "Comma-separated source paths"
+    default: "src"
+  base:
+    description: "Base git ref to diff against (defaults to the PR base / previous commit)"
+    default: ""
+
+runs:
+  using: "docker"
+  image: "Dockerfile"

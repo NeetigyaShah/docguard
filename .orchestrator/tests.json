@@ -509,6 +509,126 @@
       "expected": "True",
       "actual": "True",
       "status": "PASS"
+    },
+    {
+      "id": "P5-01",
+      "phase": 5,
+      "kind": "predefined",
+      "description": "Docker image builds and CLI runs",
+      "input": "docker build -t docguard:test .",
+      "expected": "exit 0 + docguard analyze --help works",
+      "actual": "built (manifest 900a7757...), docguard analyze --help prints usage",
+      "status": "PASS"
+    },
+    {
+      "id": "P5-02",
+      "phase": 5,
+      "kind": "predefined",
+      "description": "Action metadata valid (docker + Dockerfile + inputs)",
+      "input": "action.yml",
+      "expected": "True",
+      "actual": "True",
+      "status": "PASS"
+    },
+    {
+      "id": "P5-03",
+      "phase": 5,
+      "kind": "predefined",
+      "description": "Mocked GitHub API: comment posted",
+      "input": "run(mode=comment)",
+      "expected": "('commented', True)",
+      "actual": "('commented', True)",
+      "status": "PASS"
+    },
+    {
+      "id": "P5-04",
+      "phase": 5,
+      "kind": "predefined",
+      "description": "PR comment generation (counts + refs)",
+      "input": "build_comment",
+      "expected": "True",
+      "actual": "True",
+      "status": "PASS"
+    },
+    {
+      "id": "P5-05",
+      "phase": 5,
+      "kind": "predefined",
+      "description": "Fix branch/PR generation",
+      "input": "run(mode=pr)",
+      "expected": "('pr-opened', True, True)",
+      "actual": "('pr-opened', True, True)",
+      "status": "PASS"
+    },
+    {
+      "id": "P5-06",
+      "phase": 5,
+      "kind": "predefined",
+      "description": "Loop prevention (bot branch / skip token / normal)",
+      "input": "should_skip",
+      "expected": "(True, True, False)",
+      "actual": "(True, True, False)",
+      "status": "PASS"
+    },
+    {
+      "id": "P5-07",
+      "phase": 5,
+      "kind": "predefined",
+      "description": "Missing credentials -> safe dry-run",
+      "input": "run(token='')",
+      "expected": "'dry-run'",
+      "actual": "'dry-run'",
+      "status": "PASS"
+    },
+    {
+      "id": "P5-08",
+      "phase": 5,
+      "kind": "predefined",
+      "description": "API failure handled gracefully",
+      "input": "client raises",
+      "expected": "'error'",
+      "actual": "'error'",
+      "status": "PASS"
+    },
+    {
+      "id": "P5-09",
+      "phase": 5,
+      "kind": "orchestrator",
+      "description": "[security] comment contains no secret token",
+      "input": "no ghp_/token leak",
+      "expected": "True",
+      "actual": "True",
+      "status": "PASS"
+    },
+    {
+      "id": "P5-10",
+      "phase": 5,
+      "kind": "orchestrator",
+      "description": "[edge] no staleness -> plan mode none",
+      "input": "empty result",
+      "expected": "'none'",
+      "actual": "'none'",
+      "status": "PASS"
+    },
+    {
+      "id": "P5-11",
+      "phase": 5,
+      "kind": "orchestrator",
+      "description": "[regression] PR body carries report marker (idempotency)",
+      "input": "plan pr_body",
+      "expected": "True",
+      "actual": "True",
+      "status": "PASS"
+    },
+    {
+      "id": "P5-12",
+      "phase": 5,
+      "kind": "orchestrator",
+      "description": "[edge] comment upsert edits existing, no duplicate",
+      "input": "existing marker comment",
+      "expected": "True",
+      "actual": "True",
+      "status": "PASS"
     }
   ]
 }

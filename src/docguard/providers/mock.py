@@ -103,9 +103,15 @@ def _default_changes(old: str, new: str) -> list[tuple[str, str, str]]:
     od = dict(parse_params(old))
     nd = dict(parse_params(new))
     out = []
+    # same-name default changes
     for name, newdef in nd.items():
         if name in od and od[name] is not None and newdef is not None and od[name] != newdef:
             out.append((name, od[name], newdef))
+    # default changes that ride along with a rename (old_name -> new_name)
+    for old_name, new_name in _renames(old, new):
+        ov, nv = od.get(old_name), nd.get(new_name)
+        if ov is not None and nv is not None and ov != nv:
+            out.append((new_name, ov, nv))
     return out
 
 

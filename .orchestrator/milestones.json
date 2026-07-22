@@ -5,7 +5,7 @@
     {"phase": 2, "name": "Change Detection", "status": "PASSED", "gate": "scenarios A-G classified correctly", "passed_tests": 14, "total_tests": 14},
     {"phase": 3, "name": "Staleness Detection", "status": "PASSED", "gate": "5 labelled scenarios; TP/FP/FN tracked", "passed_tests": 10, "total_tests": 10},
     {"phase": 4, "name": "Repair + Validation + Confidence", "status": "PASSED", "gate": "7 scenarios incl byte-identical preservation", "passed_tests": 13, "total_tests": 13},
-    {"phase": 5, "name": "GitHub Action + PR/Comment", "status": "PLANNED", "gate": "docker build, mocked API, payloads, loop prevention, missing creds", "passed_tests": 0, "total_tests": 0},
+    {"phase": 5, "name": "GitHub Action + PR/Comment", "status": "PASSED", "gate": "docker build, mocked API, payloads, loop prevention, missing creds", "passed_tests": 12, "total_tests": 12},
     {"phase": 6, "name": "E2E Demo + Dashboard + Metrics", "status": "PLANNED", "gate": "6 E2E scenarios; measured metrics; dashboard builds", "passed_tests": 0, "total_tests": 0}
   ]
 }
