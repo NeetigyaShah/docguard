@@ -1,0 +1,337 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8"/>
+<meta name="viewport" content="width=device-width, initial-scale=1"/>
+<title>DocGuard × FastAPI — How it works, end to end</title>
+<style>
+  :root{
+    --ink:#0B1220; --surface:#111A2C; --surface-2:#18233A; --line:#26324D;
+    --text:#E8EEF9; --muted:#95A5C4; --faint:#5E6E90;
+    --heal:#2DD4A7; --heal-dim:#1E9B7C; --heal-glow:rgba(45,212,167,.16);
+    --stale:#F5B14C; --stale-glow:rgba(245,177,76,.14); --drift:#F0666B; --link:#77A9FF;
+    --mono:ui-monospace,"JetBrains Mono","SF Mono",Menlo,Consolas,monospace;
+    --sans:-apple-system,BlinkMacSystemFont,"Segoe UI",Inter,Roboto,sans-serif;
+    --r:14px;
+  }
+  *{box-sizing:border-box;margin:0;padding:0}
+  html,body{height:100%}
+  body{background:var(--ink);color:var(--text);font-family:var(--sans);-webkit-font-smoothing:antialiased;overflow:hidden}
+  .deck{height:100vh;width:100vw;overflow:hidden;position:relative}
+  .slide{position:absolute;inset:0;display:none;flex-direction:column;padding:clamp(30px,4.6vw,76px);opacity:0;transition:opacity .35s ease}
+  .slide.on{display:flex;opacity:1}
+  .slide::before{content:"";position:absolute;inset:0;z-index:-1;
+    background:radial-gradient(1200px 600px at 88% -10%,var(--heal-glow),transparent 60%),
+               radial-gradient(900px 500px at -10% 110%,rgba(119,169,255,.08),transparent 55%)}
+  h1{font-size:clamp(34px,5.4vw,74px);line-height:1.03;letter-spacing:-.03em;font-weight:800}
+  h2{font-size:clamp(24px,3.4vw,44px);line-height:1.06;letter-spacing:-.02em;font-weight:750}
+  .lede{font-size:clamp(16px,1.6vw,21px);color:var(--muted);max-width:64ch;line-height:1.5}
+  .eyebrow{font:600 13px/1 var(--mono);letter-spacing:.2em;text-transform:uppercase;color:var(--heal)}
+  .kicker{display:flex;align-items:center;gap:12px;margin-bottom:22px}
+  .kicker .n{font:600 12px/1 var(--mono);color:var(--faint);letter-spacing:.12em}
+  .grow{flex:1;min-height:0}
+  .row{display:flex;gap:clamp(20px,3vw,42px)}
+  .col{flex:1;min-width:0}
+  .mt{margin-top:clamp(18px,2.6vh,36px)} .mt-s{margin-top:12px} .mt-l{margin-top:clamp(24px,4vh,48px)}
+  .brand{display:flex;align-items:center;gap:13px}
+  .mark{width:42px;height:42px;flex:none;filter:drop-shadow(0 3px 14px var(--heal-glow))}
+  .mark svg{width:100%;height:100%}
+  .brand .wm{font:800 20px/1 var(--sans);letter-spacing:-.02em} .brand .wm b{color:var(--heal)}
+  .chips{display:flex;flex-wrap:wrap;gap:10px}
+  .chip{font:600 12.5px/1 var(--mono);padding:8px 12px;border-radius:999px;border:1px solid var(--line);color:var(--muted);background:var(--surface);white-space:nowrap}
+  .chip.hl{color:var(--heal);border-color:var(--heal-dim);background:var(--heal-glow)}
+  .chip.warn{color:var(--stale);border-color:#7a5a22;background:var(--stale-glow)}
+  .card{background:linear-gradient(180deg,var(--surface),#0f1728);border:1px solid var(--line);border-radius:var(--r);padding:clamp(16px,1.9vw,24px)}
+  .card h3{font-size:18px;font-weight:700;margin-bottom:6px;letter-spacing:-.01em}
+  .card p{color:var(--muted);font-size:15px;line-height:1.5}
+  .code{background:#0A1120;border:1px solid var(--line);border-radius:12px;overflow:hidden;font:13.5px/1.7 var(--mono)}
+  .code .bar{display:flex;align-items:center;gap:8px;padding:9px 14px;border-bottom:1px solid var(--line);background:#0c1424;color:var(--muted);font-size:12px}
+  .code .bar .dot{width:10px;height:10px;border-radius:50%}
+  .code pre{padding:13px 16px;overflow:auto;white-space:pre-wrap;word-break:break-word}
+  .add{color:#8ff0cf;background:rgba(45,212,167,.10);display:block;border-left:2px solid var(--heal)}
+  .del{color:#ffb3b6;background:rgba(240,102,107,.10);display:block;border-left:2px solid var(--drift)}
+  .add::before{content:"+ ";color:var(--heal)} .del::before{content:"− ";color:var(--drift)}
+  .ctx{color:var(--muted);display:block;padding-left:14px}
+  .tok{color:var(--stale);font-weight:700} .tok-new{color:var(--heal);font-weight:700}
+  .shot{border:1px solid var(--line);border-radius:12px;overflow:hidden;background:#fff;box-shadow:0 18px 50px rgba(0,0,0,.45)}
+  .shot img{display:block;width:100%}
+  .cap{font:500 12.5px/1.4 var(--mono);color:var(--faint);margin-top:9px} .cap a{color:var(--link);text-decoration:none}
+  .lbl{display:inline-flex;align-items:center;gap:7px;font:600 12px/1 var(--mono);color:var(--muted);letter-spacing:.05em;text-transform:uppercase}
+  .lbl .d{width:8px;height:8px;border-radius:50%}
+  ul.clean{list-style:none;display:flex;flex-direction:column;gap:11px}
+  ul.clean li{padding-left:24px;position:relative;color:var(--muted);font-size:15.5px;line-height:1.5}
+  ul.clean li::before{content:"▸";position:absolute;left:0;color:var(--heal)}
+  ul.clean li b{color:var(--text)}
+  /* timeline */
+  .tl{display:flex;align-items:stretch;gap:0;position:relative}
+  .tl .node{flex:1;position:relative;padding:0 8px}
+  .tl .rail{position:absolute;top:34px;left:0;right:0;height:2px;background:var(--line)}
+  .tl .rail.stale{background:repeating-linear-gradient(90deg,var(--stale) 0 8px,transparent 8px 16px)}
+  .tl .dot{width:16px;height:16px;border-radius:50%;background:var(--ink);border:2px solid var(--heal);position:relative;margin:27px auto 0;z-index:2}
+  .tl .dot.warn{border-color:var(--stale)}
+  .tl .date{font:700 13px/1 var(--mono);text-align:center;margin-bottom:6px}
+  .tl .t{text-align:center;font-size:14px;font-weight:600;margin-top:14px}
+  .tl .s{text-align:center;font:500 12px/1.4 var(--mono);color:var(--faint);margin-top:6px}
+  /* map columns */
+  .maps{display:grid;grid-template-columns:1fr auto 1fr;gap:22px;align-items:center}
+  .maplist{background:var(--surface);border:1px solid var(--line);border-radius:12px;padding:16px 18px}
+  .maplist .h{font:600 12px/1 var(--mono);color:var(--faint);letter-spacing:.06em;text-transform:uppercase;margin-bottom:12px}
+  .maplist .sym{font:14px/1.9 var(--mono);color:var(--muted);display:block}
+  .maplist .sym.match{color:var(--heal);font-weight:700}
+  .maplist .sym.stale{color:var(--stale);font-weight:700}
+  .maparrow{display:flex;flex-direction:column;align-items:center;gap:6px;color:var(--heal)}
+  .maparrow .big{font-size:26px}
+  .maparrow .lab{font:600 11px/1.3 var(--mono);color:var(--faint);text-align:center;max-width:90px}
+  .step-pill{display:inline-flex;align-items:center;gap:10px;background:var(--surface);border:1px solid var(--line);border-radius:999px;padding:7px 15px;font:700 13px/1 var(--sans)}
+  .step-pill .num{font:700 12px/1 var(--mono);color:var(--heal);letter-spacing:.08em}
+  .stat .v{font:800 clamp(30px,3.6vw,50px)/1 var(--sans);letter-spacing:-.02em;color:var(--heal)}
+  .stat .k{font:600 12.5px/1.3 var(--mono);color:var(--muted);margin-top:4px}
+  .callout{border-left:3px solid var(--heal);padding:6px 0 6px 18px;color:var(--muted);font-size:15.5px;line-height:1.55}
+  .callout b{color:var(--text)}
+  .callout.warn{border-color:var(--stale)}
+  .foot{position:fixed;bottom:18px;left:0;right:0;display:flex;align-items:center;justify-content:space-between;padding:0 clamp(24px,4vw,60px);z-index:20;pointer-events:none}
+  .foot .fb{font:600 12px/1 var(--mono);color:var(--faint);letter-spacing:.08em}
+  .prog{position:fixed;top:0;left:0;height:3px;background:var(--heal);z-index:30;transition:width .35s ease;box-shadow:0 0 12px var(--heal)}
+  .dots{display:flex;gap:8px;pointer-events:auto}
+  .dots i{width:8px;height:8px;border-radius:50%;background:var(--line);cursor:pointer;transition:.2s}
+  .dots i.on{background:var(--heal);transform:scale(1.25)}
+  @media print{body,.deck{height:auto;overflow:visible}.slide{display:flex!important;opacity:1!important;position:relative;height:100vh;page-break-after:always;inset:auto}.foot,.prog,.dots{display:none}}
+</style>
+</head>
+<body>
+<div class="prog" id="prog"></div>
+<div class="deck" id="deck">
+
+  <!-- 1 TITLE -->
+  <section class="slide">
+    <div class="brand"><div class="mark"><svg viewBox="0 0 48 48" fill="none">
+      <path d="M24 3l16 6v11c0 11-7 19-16 24C15 39 8 31 8 20V9l16-6z" fill="#0f1728" stroke="#2DD4A7" stroke-width="1.6"/>
+      <path d="M15 25h5l3-8 4 14 3-8h3" stroke="#2DD4A7" stroke-width="2.2" fill="none" stroke-linecap="round" stroke-linejoin="round"/></svg></div>
+      <span class="wm">Doc<b>Guard</b></span></div>
+    <div class="grow" style="display:flex;flex-direction:column;justify-content:center">
+      <div class="eyebrow">A real case, start to finish</div>
+      <h1 class="mt-s">FastAPI shipped a<br/>stale doc for 2 months.</h1>
+      <p class="lede mt">In July 2023, FastAPI renamed a parameter in code. One doc line was missed.
+        A human caught it and fixed it by hand — <b style="color:var(--text)">60 days later</b>.
+        Here's exactly how DocGuard would have fixed it the same day, step by step.</p>
+      <div class="chips mt"><span class="chip warn">the drift</span><span class="chip hl">→ how the engine maps it</span><span class="chip hl">→ how it heals it</span></div>
+    </div>
+    <div class="lbl"><span class="d" style="background:var(--heal)"></span> fastapi/fastapi · 101k★ · real merged PRs #9786 &amp; #10085</div>
+  </section>
+
+  <!-- 2 THE STORY / TIMELINE -->
+  <section class="slide">
+    <div class="kicker"><span class="eyebrow">What actually happened</span><span class="n">/ 02</span></div>
+    <h2>Two PRs. Sixty days apart. For one word.</h2>
+    <div class="tl mt-l" style="margin-top:clamp(30px,7vh,70px)">
+      <div class="node"><div class="rail" style="left:50%"></div>
+        <div class="date" style="color:var(--heal)">Jul 4, 2023</div><div class="dot"></div>
+        <div class="t">PR&nbsp;#9786 — code</div><div class="s">renames <span class="tok">regex</span> → <span class="tok-new">pattern</span> in <code>Query()</code>. Updates most docs…</div></div>
+      <div class="node"><div class="rail stale"></div>
+        <div class="date" style="color:var(--stale)">~60 days</div><div class="dot warn"></div>
+        <div class="t" style="color:var(--stale)">docs silently wrong</div><div class="s">the Recap list still says <span class="tok">regex</span>. Nobody notices.</div></div>
+      <div class="node"><div class="rail" style="right:50%"></div>
+        <div class="date" style="color:var(--heal)">Sep 2, 2023</div><div class="dot"></div>
+        <div class="t">PR&nbsp;#10085 — docs</div><div class="s">a contributor spots it, opens a PR just to change one word.</div></div>
+    </div>
+    <div class="row mt-l" style="gap:24px">
+      <div class="col"><div class="shot"><img src="assets/fastapi_codepr.png" alt="PR 9786"/></div>
+        <div class="cap">Real: <a href="https://github.com/fastapi/fastapi/pull/9786">#9786</a> — even a careful PR that touched docs missed one spot.</div></div>
+      <div class="col"><div class="shot"><img src="assets/fastapi_docfix.png" alt="PR 10085"/></div>
+        <div class="cap">Real: <a href="https://github.com/fastapi/fastapi/pull/10085">#10085</a> — a whole PR, 2 months later, for one word.</div></div>
+    </div>
+  </section>
+
+  <!-- 3 ZOOM: the stale line -->
+  <section class="slide">
+    <div class="kicker"><span class="eyebrow">The spot that was missed</span><span class="n">/ 03</span></div>
+    <h2>The code said <span style="color:var(--heal)">pattern</span>. The doc still said <span style="color:var(--stale)">regex</span>.</h2>
+    <div class="row mt-l grow" style="align-items:center">
+      <div class="col">
+        <div class="lbl mb"><span class="d" style="background:var(--heal)"></span> the code, after #9786</div>
+        <div class="code mt-s"><div class="bar"><span class="dot" style="background:#2dd4a7"></span><span style="margin-left:4px">fastapi/param_functions.py</span></div>
+          <pre><span class="ctx" style="padding-left:0">def Query(default=None, *, alias=None, title=None,</span><span class="ctx" style="padding-left:0">          min_length=None, max_length=None,</span><span class="add">          pattern=None,      # was: regex</span><span class="ctx" style="padding-left:0">          deprecated=None): ...</span></pre></div>
+      </div>
+      <div class="col">
+        <div class="lbl"><span class="d" style="background:var(--stale)"></span> the doc, still unchanged</div>
+        <div class="code mt-s"><div class="bar"><span class="dot" style="background:#f5b14c"></span><span style="margin-left:4px">docs/…/query-params-str-validations.md · Recap</span></div>
+          <pre><span class="ctx" style="padding-left:0">Validations specific for strings:</span><span class="ctx" style="padding-left:0"></span><span class="ctx" style="padding-left:0">* `min_length`</span><span class="ctx" style="padding-left:0">* `max_length`</span><span class="del">* `regex`</span></pre></div>
+      </div>
+    </div>
+    <div class="callout warn mt-l">A reader copies <span class="tok">regex</span> from the docs → gets a deprecation error. <b>The manual is lying about the machine.</b></div>
+  </section>
+
+  <!-- 4 PROCESS OVERVIEW -->
+  <section class="slide">
+    <div class="kicker"><span class="eyebrow">How DocGuard would catch it</span><span class="n">/ 04</span></div>
+    <h2>Five steps, on every push.</h2>
+    <p class="lede mt-s">The moment #9786 merges, DocGuard runs in CI. No human has to remember anything.</p>
+    <div class="grow" style="display:flex;flex-direction:column;justify-content:center;gap:18px">
+      <div class="row" style="gap:14px">
+        <div class="card col"><div class="lbl"><span class="num" style="color:var(--heal);font:700 12px/1 var(--mono)">01</span> DETECT</div><p class="mt-s">Parse the code diff → “<code>Query</code> lost <span class="tok">regex</span>, gained <span class="tok-new">pattern</span>.”</p></div>
+        <div class="card col"><div class="lbl"><span class="num" style="color:var(--heal);font:700 12px/1 var(--mono)">02</span> MAP</div><p class="mt-s">Find which doc section is about <code>Query</code> — by shared symbol names.</p></div>
+        <div class="card col"><div class="lbl"><span class="num" style="color:var(--heal);font:700 12px/1 var(--mono)">03</span> VERIFY</div><p class="mt-s">Does that section still contain the old word <span class="tok">regex</span>? Yes → stale.</p></div>
+      </div>
+      <div class="row" style="gap:14px;max-width:66%">
+        <div class="card col"><div class="lbl"><span class="num" style="color:var(--heal);font:700 12px/1 var(--mono)">04</span> REPAIR</div><p class="mt-s">Swap only <span class="tok">regex</span>→<span class="tok-new">pattern</span>. Every other byte identical.</p></div>
+        <div class="card col"><div class="lbl"><span class="num" style="color:var(--heal);font:700 12px/1 var(--mono)">05</span> GATE</div><p class="mt-s">A clean rename = high confidence → <b style="color:var(--heal)">opens a PR</b>.</p></div>
+      </div>
+    </div>
+  </section>
+
+  <!-- 5 STEP 1 DETECT -->
+  <section class="slide">
+    <div class="step-pill"><span class="num">STEP 01</span> DETECT</div>
+    <h2 class="mt-l">Read the diff as facts, not text.</h2>
+    <p class="lede mt-s">DocGuard doesn't diff strings — it parses both versions of the file and compares <em>structured parameters</em>.</p>
+    <div class="row mt-l grow" style="align-items:center">
+      <div class="col code"><div class="bar"><span style="color:var(--faint)">before → after · fastapi/param_functions.py</span></div>
+        <pre><span class="ctx" style="padding-left:0">Query.params (old): [default, alias, title,</span><span class="ctx" style="padding-left:0">   min_length, max_length, </span><span class="tok">regex</span><span class="ctx" style="padding-left:0">, deprecated]</span><span class="ctx" style="padding-left:0"></span><span class="ctx" style="padding-left:0">Query.params (new): [default, alias, title,</span><span class="ctx" style="padding-left:0">   min_length, max_length, </span><span class="tok-new">pattern</span><span class="ctx" style="padding-left:0">, deprecated]</span></pre></div>
+      <div class="col">
+        <ul class="clean">
+          <li>One param removed (<span class="tok">regex</span>), one added (<span class="tok-new">pattern</span>), same position →</li>
+          <li><b>classified as a rename</b> — the change that most often makes docs stale</li>
+          <li>The renamed token <span class="tok">regex</span> becomes the <b>thing to hunt for</b> in the docs</li>
+        </ul>
+        <div class="callout mt">This works the same in Python, TypeScript, JavaScript &amp; Java — params are params in every language.</div>
+      </div>
+    </div>
+  </section>
+
+  <!-- 6 STEP 2 MAP (the heart) -->
+  <section class="slide">
+    <div class="step-pill"><span class="num">STEP 02</span> MAP · the core idea</div>
+    <h2 class="mt-l">How does it know this doc is about <code>Query</code>?</h2>
+    <p class="lede mt-s">Nothing formally links them. So DocGuard matches the <b style="color:var(--text)">names both sides share</b>. The more they overlap, the stronger the link.</p>
+    <div class="maps mt-l grow" style="align-items:center">
+      <div class="maplist">
+        <div class="h">code · Query() parameters</div>
+        <span class="sym match">alias</span><span class="sym match">title</span><span class="sym match">description</span>
+        <span class="sym match">min_length</span><span class="sym match">max_length</span>
+        <span class="sym match">deprecated</span><span class="sym stale">regex → pattern</span>
+      </div>
+      <div class="maparrow"><span class="big">⇄</span><span class="lab">6 shared names → strong link</span></div>
+      <div class="maplist">
+        <div class="h">doc · “Recap” section symbols</div>
+        <span class="sym match">alias</span><span class="sym match">title</span><span class="sym match">description</span>
+        <span class="sym match">min_length</span><span class="sym match">max_length</span>
+        <span class="sym match">deprecated</span><span class="sym stale">regex</span>
+      </div>
+    </div>
+    <div class="callout mt-l">If names don't match (e.g. a rewritten paragraph), DocGuard falls back to <b>meaning</b> — an embedding similarity — and if it's still unsure, it asks a human instead of guessing.</div>
+  </section>
+
+  <!-- 7 STEP 3 VERIFY -->
+  <section class="slide">
+    <div class="step-pill"><span class="num">STEP 03</span> VERIFY</div>
+    <h2 class="mt-l">Is it <em>actually</em> stale — or just related?</h2>
+    <p class="lede mt-s">A link isn't enough. Not every change breaks a doc. DocGuard checks the one concrete thing that changed.</p>
+    <div class="row mt-l grow" style="align-items:center">
+      <div class="col code"><div class="bar"><span style="color:var(--faint)">the check</span></div>
+        <pre><span class="ctx" style="padding-left:0">change:  param renamed  </span><span class="tok">regex</span><span class="ctx" style="padding-left:0"> → </span><span class="tok-new">pattern</span><span class="ctx" style="padding-left:0">linked doc still contains  “</span><span class="tok">regex</span><span class="ctx" style="padding-left:0">” ?</span><span class="add">  YES  →  verdict: STALE  (confidence 0.92)</span></pre></div>
+      <div class="col">
+        <ul class="clean">
+          <li>The old name <span class="tok">regex</span> is <b>still literally in the doc</b> → provably out of date</li>
+          <li>If the doc had already said <span class="tok-new">pattern</span> → verdict <b>accurate</b>, do nothing</li>
+          <li>No guessing about topics — it matches a <b>fact that changed</b></li>
+        </ul>
+        <div class="callout mt">This is why false positives are rare: the signal is a specific word that provably moved, not a vibe.</div>
+      </div>
+    </div>
+  </section>
+
+  <!-- 8 STEP 4 REPAIR -->
+  <section class="slide">
+    <div class="step-pill"><span class="num">STEP 04</span> REPAIR</div>
+    <h2 class="mt-l">Change the one word. Touch nothing else.</h2>
+    <div class="row mt-l grow" style="align-items:center">
+      <div class="col">
+        <div class="lbl"><span class="d" style="background:var(--drift)"></span> before · Recap</div>
+        <div class="code mt-s"><div class="bar">docs/…/query-params-str-validations.md</div>
+          <pre><span class="ctx" style="padding-left:0">* `min_length`</span><span class="ctx" style="padding-left:0">* `max_length`</span><span class="del">* `regex`</span></pre></div>
+      </div>
+      <div class="col">
+        <div class="lbl"><span class="d" style="background:var(--heal)"></span> after · DocGuard's fix</div>
+        <div class="code mt-s"><div class="bar">docs/…/query-params-str-validations.md · auto</div>
+          <pre><span class="ctx" style="padding-left:0">* `min_length`</span><span class="ctx" style="padding-left:0">* `max_length`</span><span class="add">* `pattern`</span></pre></div>
+      </div>
+    </div>
+    <div class="callout mt-l"><b>Surgical:</b> only the backticked <span class="tok">regex</span> becomes <span class="tok-new">pattern</span>. Headings, list order, spacing, every other line — byte-for-byte unchanged.</div>
+  </section>
+
+  <!-- 9 STEP 5 GATE + RESULT -->
+  <section class="slide">
+    <div class="step-pill"><span class="num">STEP 05</span> GATE → the result</div>
+    <h2 class="mt-l">DocGuard's fix == the human's fix. Just 60 days sooner.</h2>
+    <div class="row mt-l grow" style="align-items:center">
+      <div class="col">
+        <div class="code"><div class="bar"><span class="dot" style="background:#2dd4a7"></span><span style="margin-left:4px">DocGuard — real output (offline, this repo)</span></div>
+          <pre><span class="ctx" style="padding-left:0">stale docs detected: 1  |  auto-fix: 1  |  review: 0</span><span class="ctx" style="padding-left:0">section: Query Parameters… / Recap</span><span class="del">* `regex`</span><span class="add">* `pattern`</span></pre></div>
+        <div class="cap">Identical to human PR&nbsp;#10085 — generated automatically from the code diff.</div>
+      </div>
+      <div class="col" style="max-width:40%">
+        <div class="card"><div class="lbl"><span class="d" style="background:var(--heal)"></span> High confidence → opens a PR</div>
+          <p class="mt-s">Clean, unambiguous rename. DocGuard drafts the doc PR for a human to click merge.</p></div>
+        <div class="card mt" style="border-color:#7a5a22"><div class="lbl"><span class="d" style="background:var(--stale)"></span> Unsure → review comment</div>
+          <p class="mt-s">Removed features or ambiguous prose → flagged, never auto-rewritten.</p></div>
+      </div>
+    </div>
+  </section>
+
+  <!-- 10 WHY IT GENERALIZES + CLOSE -->
+  <section class="slide">
+    <div class="kicker"><span class="eyebrow">Why this scales</span><span class="n">/ 10</span></div>
+    <h2>One missed word today. Every repo, every language, tomorrow.</h2>
+    <div class="row mt-l" style="gap:20px">
+      <div class="col stat"><div class="v">60→0</div><div class="k">days of drift, gone</div></div>
+      <div class="col stat"><div class="v">4</div><div class="k">languages · py · ts · js · java</div></div>
+      <div class="col stat"><div class="v">0</div><div class="k">humans in the loop to detect</div></div>
+      <div class="col stat"><div class="v">1</div><div class="k">CI check, every PR</div></div>
+    </div>
+    <div class="row mt-l grow">
+      <div class="col"><ul class="clean">
+        <li>The exact same 5 steps run for a <b>TypeScript</b> prop rename or a <b>Java</b> method change</li>
+        <li>Mapping filters candidates <b>before any model call</b> — cheap at 1000 PRs/day</li>
+        <li>Ships as a <b>GitHub Action</b>; drops into existing CI with no code changes</li>
+      </ul></div>
+      <div class="col" style="display:flex;flex-direction:column;justify-content:center">
+        <div class="brand" style="margin-bottom:16px"><div class="mark"><svg viewBox="0 0 48 48" fill="none">
+          <path d="M24 3l16 6v11c0 11-7 19-16 24C15 39 8 31 8 20V9l16-6z" fill="#0f1728" stroke="#2DD4A7" stroke-width="1.6"/>
+          <path d="M15 25h5l3-8 4 14 3-8h3" stroke="#2DD4A7" stroke-width="2.2" fill="none" stroke-linecap="round" stroke-linejoin="round"/></svg></div>
+          <span class="wm">Doc<b>Guard</b></span></div>
+        <h2 style="font-size:clamp(22px,2.6vw,34px)">Docs that match the code —<br/>on the day the code changes.</h2>
+      </div>
+    </div>
+  </section>
+
+</div>
+
+<div class="foot">
+  <div class="fb">Doc<span style="color:var(--heal)">Guard</span> × FastAPI</div>
+  <div class="dots" id="dots"></div>
+  <div class="fb" id="fb-r">01 / 10</div>
+</div>
+
+<script>
+  const slides=[...document.querySelectorAll('.slide')];
+  const dots=document.getElementById('dots'), prog=document.getElementById('prog'), fbR=document.getElementById('fb-r');
+  let i=0;
+  slides.forEach((_,k)=>{const d=document.createElement('i');d.onclick=()=>go(k);dots.appendChild(d);});
+  const dEls=[...dots.children];
+  function go(n){i=Math.max(0,Math.min(slides.length-1,n));
+    slides.forEach((s,k)=>s.classList.toggle('on',k===i));
+    dEls.forEach((d,k)=>d.classList.toggle('on',k===i));
+    prog.style.width=((i+1)/slides.length*100)+'%';
+    fbR.textContent=String(i+1).padStart(2,'0')+' / '+String(slides.length).padStart(2,'0');}
+  document.addEventListener('keydown',e=>{
+    if(e.key==='ArrowRight'||e.key===' '||e.key==='PageDown'){e.preventDefault();go(i+1);}
+    else if(e.key==='ArrowLeft'||e.key==='PageUp'){e.preventDefault();go(i-1);}
+    else if(e.key==='Home')go(0); else if(e.key==='End')go(slides.length-1);
+    else if(e.key==='f'||e.key==='F'){document.fullscreenElement?document.exitFullscreen():document.documentElement.requestFullscreen();}
+    else if(e.key==='p'||e.key==='P')window.print();});
+  let sx=0;addEventListener('touchstart',e=>sx=e.touches[0].clientX,{passive:true});
+  addEventListener('touchend',e=>{const dx=e.changedTouches[0].clientX-sx;if(Math.abs(dx)>50)go(i+(dx<0?1:-1));},{passive:true});
+  go(0);
+</script>
+</body>
+</html>
