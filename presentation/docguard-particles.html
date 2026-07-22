@@ -3,7 +3,7 @@
 <head>
 <meta charset="utf-8"/>
 <meta name="viewport" content="width=device-width, initial-scale=1"/>
-<title>DocGuard — particle edition</title>
+<title>DocGuard — how it works, in plain English</title>
 <style>
   :root{
     --ink:#05070C; --surface:#0E1626; --line:#22304C; --text:#EAF1FB; --muted:#93A5C6; --faint:#57678A;
@@ -15,28 +15,31 @@
   html,body{height:100%}
   body{background:var(--ink);color:var(--text);font-family:var(--sans);-webkit-font-smoothing:antialiased;overflow:hidden}
   .deck{height:100vh;width:100vw;overflow:hidden;position:relative}
-  .slide{position:absolute;inset:0;display:none;flex-direction:column;padding:clamp(30px,4.6vw,74px);opacity:0;transition:opacity .4s ease}
+  .slide{position:absolute;inset:0;display:none;flex-direction:column;padding:clamp(28px,4.4vw,70px);opacity:0;transition:opacity .4s ease}
   .slide.on{display:flex;opacity:1}
   .slide.dark::before{content:"";position:absolute;inset:0;z-index:-1;
     background:radial-gradient(1100px 560px at 85% -12%,var(--heal-glow),transparent 60%),
                radial-gradient(900px 500px at -10% 110%,rgba(119,169,255,.07),transparent 55%)}
-  h2{font-size:clamp(24px,3.4vw,44px);line-height:1.06;letter-spacing:-.02em;font-weight:750}
-  .lede{font-size:clamp(16px,1.6vw,21px);color:var(--muted);max-width:64ch;line-height:1.5}
+  h2{font-size:clamp(23px,3.2vw,42px);line-height:1.07;letter-spacing:-.02em;font-weight:750}
+  h3{font-size:18px;font-weight:700;letter-spacing:-.01em}
+  .big{font-size:clamp(30px,4.4vw,60px);line-height:1.03;letter-spacing:-.03em;font-weight:800}
+  .lede{font-size:clamp(16px,1.6vw,21px);color:var(--muted);max-width:66ch;line-height:1.5}
   .eyebrow{font:600 13px/1 var(--mono);letter-spacing:.2em;text-transform:uppercase;color:var(--heal)}
-  .kicker{display:flex;align-items:center;gap:12px;margin-bottom:22px}
+  .kicker{display:flex;align-items:center;gap:12px;margin-bottom:20px}
   .kicker .n{font:600 12px/1 var(--mono);color:var(--faint);letter-spacing:.12em}
-  .grow{flex:1;min-height:0}
-  .row{display:flex;gap:clamp(20px,3vw,42px)} .col{flex:1;min-width:0}
-  .mt{margin-top:clamp(18px,2.6vh,36px)} .mt-s{margin-top:12px} .mt-l{margin-top:clamp(24px,4vh,46px)}
+  .grow{flex:1;min-height:0} .center{justify-content:center}
+  .row{display:flex;gap:clamp(18px,2.6vw,38px)} .col{flex:1;min-width:0}
+  .mt{margin-top:clamp(16px,2.4vh,32px)} .mt-s{margin-top:10px} .mt-l{margin-top:clamp(22px,3.6vh,44px)}
   .brand{display:flex;align-items:center;gap:12px}
   .mark{width:40px;height:40px;flex:none;filter:drop-shadow(0 3px 14px var(--heal-glow))} .mark svg{width:100%;height:100%}
   .brand .wm{font:800 20px/1 var(--sans);letter-spacing:-.02em} .brand .wm b{color:var(--heal)}
-  .chips{display:flex;flex-wrap:wrap;gap:10px}
+  .chips{display:flex;flex-wrap:wrap;gap:9px}
   .chip{font:600 12.5px/1 var(--mono);padding:8px 12px;border-radius:999px;border:1px solid var(--line);color:var(--muted);background:var(--surface);white-space:nowrap}
   .chip.hl{color:var(--heal);border-color:var(--heal-dim);background:var(--heal-glow)}
   .chip.warn{color:var(--stale);border-color:#7a5a22}
   .card{background:linear-gradient(180deg,var(--surface),#0a1120);border:1px solid var(--line);border-radius:14px;padding:clamp(16px,1.9vw,24px)}
-  .card p{color:var(--muted);font-size:15px;line-height:1.5}
+  .card p{color:var(--muted);font-size:15px;line-height:1.5;margin-top:6px}
+  .card .num{font:800 26px/1 var(--sans);color:var(--heal)}
   .code{background:#070C16;border:1px solid var(--line);border-radius:12px;overflow:hidden;font:13.5px/1.7 var(--mono)}
   .code .bar{display:flex;align-items:center;gap:8px;padding:9px 14px;border-bottom:1px solid var(--line);background:#0a111f;color:var(--muted);font-size:12px}
   .code .bar .dot{width:10px;height:10px;border-radius:50%}
@@ -49,46 +52,67 @@
   .lbl{display:inline-flex;align-items:center;gap:7px;font:600 12px/1 var(--mono);color:var(--muted);letter-spacing:.05em;text-transform:uppercase}
   .lbl .d{width:8px;height:8px;border-radius:50%}
   ul.clean{list-style:none;display:flex;flex-direction:column;gap:11px}
-  ul.clean li{padding-left:24px;position:relative;color:var(--muted);font-size:15.5px;line-height:1.5}
+  ul.clean li{padding-left:24px;position:relative;color:var(--muted);font-size:16px;line-height:1.5}
   ul.clean li::before{content:"▸";position:absolute;left:0;color:var(--heal)}
   ul.clean li b{color:var(--text)}
   .callout{border-left:3px solid var(--heal);padding:6px 0 6px 18px;color:var(--muted);font-size:15.5px;line-height:1.55}
-  .callout b{color:var(--text)} .callout.warn{border-color:var(--stale)}
+  .callout b{color:var(--text)} .callout.warn{border-color:var(--stale)} .callout.big{font-size:19px}
+  /* screenshot slide */
+  .shot{border:1px solid var(--line);border-radius:12px;overflow:hidden;background:#fff;box-shadow:0 18px 55px rgba(0,0,0,.5)}
+  .shot img{display:block;width:100%}
+  .shot.frame{max-height:60vh} .shot.frame img{object-fit:cover;object-position:top;max-height:60vh}
+  .cap{font:500 12.5px/1.4 var(--mono);color:var(--faint);margin-top:9px} .cap a{color:var(--link);text-decoration:none}
+  /* three-panel flow */
+  .flow{display:grid;grid-template-columns:1fr auto 1fr auto 1fr;gap:14px;align-items:stretch}
+  .flow .ar{align-self:center;color:var(--heal);font-size:26px}
+  .panel{background:var(--surface);border:1px solid var(--line);border-radius:14px;padding:22px 20px;text-align:center;display:flex;flex-direction:column;gap:8px}
+  .panel .n{font:700 12px/1 var(--mono);color:var(--faint);letter-spacing:.1em}
+  .panel .t{font-size:17px;font-weight:700}
+  .panel .d{color:var(--muted);font-size:14px;line-height:1.45}
+  .panel.good{border-color:var(--heal-dim);background:var(--heal-glow)}
+  /* map columns */
   .maps{display:grid;grid-template-columns:1fr auto 1fr;gap:22px;align-items:center}
   .maplist{background:var(--surface);border:1px solid var(--line);border-radius:12px;padding:16px 18px}
   .maplist .h{font:600 12px/1 var(--mono);color:var(--faint);letter-spacing:.06em;text-transform:uppercase;margin-bottom:12px}
   .maplist .sym{font:14px/1.9 var(--mono);color:var(--muted);display:block}
   .maplist .sym.match{color:var(--heal);font-weight:700} .maplist .sym.stale{color:var(--stale);font-weight:700}
   .maparrow{display:flex;flex-direction:column;align-items:center;gap:6px;color:var(--heal)}
-  .maparrow .big{font-size:26px} .maparrow .lab{font:600 11px/1.3 var(--mono);color:var(--faint);text-align:center;max-width:90px}
+  .maparrow .b{font-size:26px} .maparrow .l{font:600 11px/1.3 var(--mono);color:var(--faint);text-align:center;max-width:96px}
   .step-pill{display:inline-flex;align-items:center;gap:10px;background:var(--surface);border:1px solid var(--line);border-radius:999px;padding:7px 15px;font:700 13px/1 var(--sans)}
   .step-pill .num{font:700 12px/1 var(--mono);color:var(--heal);letter-spacing:.08em}
-  /* ---- particle hero ---- */
-  #s-hero{background:#000;padding:0;overflow:hidden}
-  #hero-canvas{position:absolute;inset:0;width:100%;height:100%;display:block}
-  .hero-ui{position:absolute;inset:0;z-index:2;display:flex;flex-direction:column;justify-content:space-between;
-    padding:clamp(28px,4vw,60px);pointer-events:none}
+  .stat{display:flex;flex-direction:column;gap:4px} .stat .v{font:800 clamp(30px,3.6vw,50px)/1 var(--sans);color:var(--heal);letter-spacing:-.02em}
+  .stat .k{font:600 12px/1.3 var(--mono);color:var(--muted)}
+  /* timeline */
+  .tl{display:flex;align-items:flex-start;gap:0;position:relative}
+  .tl .node{flex:1;position:relative;padding:0 8px;text-align:center}
+  .tl .rail{position:absolute;top:34px;left:0;right:0;height:2px;background:var(--line)}
+  .tl .rail.stale{background:repeating-linear-gradient(90deg,var(--stale) 0 8px,transparent 8px 16px)}
+  .tl .dot{width:16px;height:16px;border-radius:50%;background:var(--ink);border:2px solid var(--heal);margin:27px auto 0;position:relative;z-index:2}
+  .tl .dot.warn{border-color:var(--stale)}
+  .tl .date{font:700 13px/1 var(--mono);margin-bottom:6px} .tl .t{font-size:14px;font-weight:600;margin-top:14px}
+  .tl .s{font:500 12px/1.4 var(--mono);color:var(--faint);margin-top:6px}
+  /* hero */
+  #s-hero,#s-close{background:#000;padding:0;overflow:hidden}
+  #hero-canvas,#close-canvas{position:absolute;inset:0;width:100%;height:100%;display:block}
+  .hero-ui{position:absolute;inset:0;z-index:2;display:flex;flex-direction:column;justify-content:space-between;padding:clamp(28px,4vw,58px);pointer-events:none}
   .hero-ui .top{display:flex;align-items:center;justify-content:space-between}
-  .hero-badge{font:600 12px/1 var(--mono);letter-spacing:.2em;text-transform:uppercase;color:var(--heal);
-    border:1px solid var(--heal-dim);background:rgba(45,212,167,.08);border-radius:999px;padding:8px 14px;backdrop-filter:blur(4px)}
-  .hero-ui .bot .eyebrow{color:var(--heal)}
-  .hero-ui h1{font-size:clamp(20px,2vw,28px);font-weight:700;letter-spacing:-.01em;margin-top:8px;color:#fff}
-  .hero-ui .sub{color:var(--muted);font:500 13px/1.5 var(--mono);margin-top:10px;max-width:52ch}
-  .hero-ui .sub b{color:#fff}
-  .foot{position:fixed;bottom:18px;left:0;right:0;display:flex;align-items:center;justify-content:space-between;padding:0 clamp(24px,4vw,60px);z-index:20;pointer-events:none}
+  .hero-badge{font:600 12px/1 var(--mono);letter-spacing:.2em;text-transform:uppercase;color:var(--heal);border:1px solid var(--heal-dim);background:rgba(45,212,167,.08);border-radius:999px;padding:8px 14px;backdrop-filter:blur(4px)}
+  .hero-ui h1{font-size:clamp(20px,2vw,28px);font-weight:700;margin-top:8px;color:#fff}
+  .hero-ui .sub{color:var(--muted);font:500 13px/1.5 var(--mono);margin-top:10px;max-width:54ch} .hero-ui .sub b{color:#fff}
+  .foot{position:fixed;bottom:16px;left:0;right:0;display:flex;align-items:center;justify-content:space-between;padding:0 clamp(24px,4vw,58px);z-index:20;pointer-events:none}
   .foot .fb{font:600 12px/1 var(--mono);color:var(--faint);letter-spacing:.08em}
-  .dots{display:flex;gap:8px;pointer-events:auto}
-  .dots i{width:8px;height:8px;border-radius:50%;background:var(--line);cursor:pointer;transition:.2s}
-  .dots i.on{background:var(--heal);transform:scale(1.25)}
+  .dots{display:flex;gap:6px;pointer-events:auto;flex-wrap:wrap;max-width:60%;justify-content:center}
+  .dots i{width:7px;height:7px;border-radius:50%;background:var(--line);cursor:pointer;transition:.2s}
+  .dots i.on{background:var(--heal);transform:scale(1.3)}
   .prog{position:fixed;top:0;left:0;height:3px;background:var(--heal);z-index:30;transition:width .35s ease;box-shadow:0 0 12px var(--heal)}
-  @media print{body,.deck{height:auto;overflow:visible}.slide{display:flex!important;opacity:1!important;position:relative;height:100vh;page-break-after:always;inset:auto}.foot,.prog,.dots{display:none}#hero-canvas{position:absolute}}
+  @media print{body,.deck{height:auto;overflow:visible}.slide{display:flex!important;opacity:1!important;position:relative;height:100vh;page-break-after:always;inset:auto}.foot,.prog,.dots{display:none}}
 </style>
 </head>
 <body>
 <div class="prog" id="prog"></div>
 <div class="deck" id="deck">
 
-  <!-- 1 · PARTICLE HERO -->
+  <!-- 1 · HERO -->
   <section class="slide" id="s-hero">
     <canvas id="hero-canvas"></canvas>
     <div class="hero-ui">
@@ -100,83 +124,248 @@
         <div class="hero-badge">Self-Healing Docs</div>
       </div>
       <div class="bot">
-        <div class="eyebrow">Watch the story in particles</div>
+        <div class="eyebrow">The whole story, in particles</div>
         <h1>Code changed. A doc said <span style="color:var(--stale)">regex</span>. DocGuard made it <span style="color:var(--heal)">pattern</span>.</h1>
-        <p class="sub">The hero cycles the real FastAPI fix. <b>Right-click + drag</b> to scatter the particles · press <b>→</b> to begin.</p>
+        <p class="sub"><b>Right-click + drag</b> to scatter the particles · press <b>→</b> to begin.</p>
       </div>
     </div>
   </section>
 
-  <!-- 2 · THE PROBLEM -->
+  <!-- 2 · 10-SECOND VERSION -->
+  <section class="slide dark center">
+    <div class="kicker"><span class="eyebrow">The whole idea in 10 seconds</span><span class="n">/ 02</span></div>
+    <h2>Code changes. Docs don't. DocGuard fixes them.</h2>
+    <div class="flow mt-l">
+      <div class="panel"><span class="n">STEP 1</span><span class="t">You change the code</span><span class="d">e.g. rename a setting from <span class="tok">regex</span> to <span class="tok-new">pattern</span>.</span></div>
+      <div class="ar">→</div>
+      <div class="panel"><span class="n">STEP 2</span><span class="t" style="color:var(--stale)">A doc goes stale</span><span class="d">A page that mentioned <span class="tok">regex</span> is now wrong — but nobody edits it.</span></div>
+      <div class="ar">→</div>
+      <div class="panel good"><span class="n">STEP 3</span><span class="t" style="color:var(--heal)">DocGuard fixes it</span><span class="d">It notices, changes the doc, and opens a fix — automatically.</span></div>
+    </div>
+    <p class="lede mt-l">That's the whole thing. The rest of this deck is one <b style="color:var(--text)">real example</b>, explained step by step.</p>
+  </section>
+
+  <!-- 3 · ANALOGY -->
+  <section class="slide dark center">
+    <div class="kicker"><span class="eyebrow">If you've never touched code</span><span class="n">/ 03</span></div>
+    <h2>Think of a car and its owner's manual.</h2>
+    <div class="row mt-l">
+      <div class="col card"><div class="lbl"><span class="d" style="background:var(--link)"></span> the code</div><h3 class="mt-s">= the car</h3><p>The thing that actually runs. Engineers change it constantly.</p></div>
+      <div class="col card"><div class="lbl"><span class="d" style="background:var(--stale)"></span> the docs</div><h3 class="mt-s">= the manual</h3><p>What people read to learn how to use it. Written in plain words, in separate files.</p></div>
+      <div class="col card good" style="border-color:var(--heal-dim);background:var(--heal-glow)"><div class="lbl"><span class="d" style="background:var(--heal)"></span> DocGuard</div><h3 class="mt-s">= the mechanic</h3><p>Updates the manual the moment the car changes — so the manual never lies about the machine.</p></div>
+    </div>
+    <div class="callout warn mt-l big">Upgrade the car but forget the manual → people follow instructions that no longer work.</div>
+  </section>
+
+  <!-- 4 · TRUE STORY INTRO -->
+  <section class="slide dark center">
+    <div class="kicker"><span class="eyebrow">This really happened</span><span class="n">/ 04</span></div>
+    <div class="big">Even FastAPI — 88,000&#8202;★ —<br/>shipped a wrong doc for <span style="color:var(--stale)">2 months</span>.</div>
+    <p class="lede mt-l">FastAPI is one of the most popular tools for building web APIs in Python. If it can happen to them, it happens to everyone. Here's the receipt — three real GitHub pull requests.</p>
+    <div class="chips mt-l"><span class="chip">PR #9786 — the code change</span><span class="chip warn">~60 days of stale docs</span><span class="chip">PR #10085 — the manual fix</span></div>
+  </section>
+
+  <!-- 5 · PR #9786 screenshot -->
   <section class="slide dark">
-    <div class="kicker"><span class="eyebrow">A real 60-day drift</span><span class="n">/ 02</span></div>
-    <h2>FastAPI renamed <span style="color:var(--heal)">one parameter</span>. A doc lied for 2 months.</h2>
+    <div class="kicker"><span class="eyebrow">Jul 4, 2023 · the code changed</span><span class="n">/ 05</span></div>
+    <h2>They renamed a setting: <span class="tok">regex</span> → <span class="tok-new">pattern</span>.</h2>
     <div class="row mt-l grow" style="align-items:center">
-      <div class="col">
+      <div class="col" style="max-width:34%">
         <ul class="clean">
-          <li><b>Jul 4 2023</b> — PR #9786 renames <span class="tok">regex</span> → <span class="tok-new">pattern</span> in <code>Query()</code>. Misses one doc line.</li>
-          <li><b>~60 days</b> — the “Recap” list still says <span class="tok">regex</span>. Readers copy a broken example.</li>
-          <li><b>Sep 2 2023</b> — a contributor opens PR #10085 <b>just to fix that one word</b>, by hand.</li>
+          <li>A real, merged pull request in FastAPI</li>
+          <li>It touched <b>16 files</b> of code…</li>
+          <li>…and even updated <b>most</b> of the docs</li>
+          <li style="color:var(--stale)">but it <b>missed one line</b></li>
         </ul>
-        <div class="callout warn mt-l">The manual was lying about the machine — and it took a human two months to notice.</div>
       </div>
-      <div class="col">
-        <div class="code"><div class="bar"><span class="dot" style="background:#f5b14c"></span><span style="margin-left:4px">docs/…/query-params-str-validations.md · Recap</span></div>
-          <pre><span class="ctx" style="padding-left:0">Validations specific for strings:</span><span class="ctx" style="padding-left:0"></span><span class="ctx" style="padding-left:0">* `min_length`</span><span class="ctx" style="padding-left:0">* `max_length`</span><span class="del">* `regex`      ← code now says `pattern`</span></pre></div>
+      <div class="col"><div class="shot frame"><img src="assets/fastapi_codepr.png" alt="FastAPI PR #9786"/></div>
+        <div class="cap">Real: <a href="https://github.com/fastapi/fastapi/pull/9786">github.com/fastapi/fastapi/pull/9786</a></div></div>
+    </div>
+  </section>
+
+  <!-- 6 · THE STALE LINE -->
+  <section class="slide dark center">
+    <div class="kicker"><span class="eyebrow">The one line they missed</span><span class="n">/ 06</span></div>
+    <h2>The code now said <span style="color:var(--heal)">pattern</span>. This doc still said <span style="color:var(--stale)">regex</span>.</h2>
+    <div class="code mt-l" style="max-width:760px"><div class="bar"><span class="dot" style="background:#f5b14c"></span><span style="margin-left:4px">docs/…/query-params-str-validations.md · “Recap” section</span></div>
+      <pre><span class="ctx" style="padding-left:0">Validations specific for strings:</span><span class="ctx" style="padding-left:0"></span><span class="ctx" style="padding-left:0">* `min_length`</span><span class="ctx" style="padding-left:0">* `max_length`</span><span class="del">* `regex`</span></pre></div>
+    <div class="callout warn mt-l big">For the next <b>60 days</b>, anyone copying <span class="tok">regex</span> from the docs got a deprecation error. The manual was lying.</div>
+  </section>
+
+  <!-- 7 · PR #10085 screenshot -->
+  <section class="slide dark">
+    <div class="kicker"><span class="eyebrow">Sep 2, 2023 · a human noticed</span><span class="n">/ 07</span></div>
+    <h2>Two months later — a whole PR, to fix <span style="color:var(--heal)">one word</span>.</h2>
+    <div class="row mt-l grow" style="align-items:center">
+      <div class="col"><div class="shot frame"><img src="assets/fastapi_docfix.png" alt="FastAPI PR #10085"/></div>
+        <div class="cap">Real: <a href="https://github.com/fastapi/fastapi/pull/10085">#10085</a> — the PR literally quotes the stale doc and changes <span class="tok">regex</span> → <span class="tok-new">pattern</span>.</div></div>
+      <div class="col" style="max-width:34%">
+        <ul class="clean">
+          <li>A <b>different contributor</b> spotted it</li>
+          <li>Opened a PR just for this <b>one word</b></li>
+          <li>Waited for review &amp; merge</li>
+          <li><b>60 days</b> after the code changed</li>
+        </ul>
       </div>
     </div>
   </section>
 
-  <!-- 3 · PIPELINE -->
+  <!-- 8 · THE COST / TIMELINE -->
+  <section class="slide dark center">
+    <div class="kicker"><span class="eyebrow">The cost of drift</span><span class="n">/ 08</span></div>
+    <h2>Two PRs. Sixty days apart. For one word.</h2>
+    <div class="tl mt-l" style="margin-top:clamp(30px,7vh,64px)">
+      <div class="node"><div class="rail" style="left:50%"></div><div class="date" style="color:var(--heal)">Jul 4</div><div class="dot"></div><div class="t">Code: regex → pattern</div><div class="s">PR #9786 merges</div></div>
+      <div class="node"><div class="rail stale"></div><div class="date" style="color:var(--stale)">~60 days</div><div class="dot warn"></div><div class="t" style="color:var(--stale)">Docs silently wrong</div><div class="s">nobody notices</div></div>
+      <div class="node"><div class="rail" style="right:50%"></div><div class="date" style="color:var(--heal)">Sep 2</div><div class="dot"></div><div class="t">A human fixes it</div><div class="s">PR #10085 merges</div></div>
+    </div>
+    <p class="lede mt-l" style="text-align:center;margin-left:auto;margin-right:auto">Now imagine this across <b style="color:var(--text)">hundreds of repos</b>, every week. That's the problem DocGuard removes.</p>
+  </section>
+
+  <!-- 9 · ENTER DOCGUARD -->
+  <section class="slide dark center">
+    <div class="brand" style="margin-bottom:20px"><div class="mark"><svg viewBox="0 0 48 48" fill="none">
+      <path d="M24 3l16 6v11c0 11-7 19-16 24C15 39 8 31 8 20V9l16-6z" fill="#0f1728" stroke="#2DD4A7" stroke-width="1.6"/>
+      <path d="M15 25h5l3-8 4 14 3-8h3" stroke="#2DD4A7" stroke-width="2.2" fill="none" stroke-linecap="round" stroke-linejoin="round"/></svg></div>
+      <span class="wm">Doc<b>Guard</b></span></div>
+    <div class="big">What if a bot caught it<br/>the <span style="color:var(--heal)">same day</span> — not 60 days later?</div>
+    <p class="lede mt-l">DocGuard runs automatically whenever code is pushed. It reads the change, finds the docs it broke, fixes them, and opens a pull request — no human has to remember. Here's exactly how, in 5 steps.</p>
+  </section>
+
+  <!-- 10 · 5 STEPS OVERVIEW -->
   <section class="slide dark">
-    <div class="kicker"><span class="eyebrow">How DocGuard catches it</span><span class="n">/ 03</span></div>
+    <div class="kicker"><span class="eyebrow">The engine · overview</span><span class="n">/ 10</span></div>
     <h2>Five steps, on every push.</h2>
     <div class="grow" style="display:flex;flex-direction:column;justify-content:center;gap:16px">
       <div class="row" style="gap:14px">
-        <div class="card col"><div class="lbl"><span style="color:var(--heal);font:700 12px/1 var(--mono)">01</span> DETECT</div><p class="mt-s"><code>Query</code> lost <span class="tok">regex</span>, gained <span class="tok-new">pattern</span> = a rename.</p></div>
-        <div class="card col"><div class="lbl"><span style="color:var(--heal);font:700 12px/1 var(--mono)">02</span> MAP</div><p class="mt-s">Which doc is about <code>Query</code>? Match shared symbol names.</p></div>
-        <div class="card col"><div class="lbl"><span style="color:var(--heal);font:700 12px/1 var(--mono)">03</span> VERIFY</div><p class="mt-s">Does that doc still contain <span class="tok">regex</span>? Yes → stale.</p></div>
+        <div class="card col"><span class="num">01</span><h3 class="mt-s">Detect</h3><p><code>Query</code> lost <span class="tok">regex</span>, gained <span class="tok-new">pattern</span> — a rename.</p></div>
+        <div class="card col"><span class="num">02</span><h3 class="mt-s">Map</h3><p>Which doc is about <code>Query</code>? Match shared names.</p></div>
+        <div class="card col"><span class="num">03</span><h3 class="mt-s">Verify</h3><p>Does that doc still say <span class="tok">regex</span>? Yes → stale.</p></div>
       </div>
       <div class="row" style="gap:14px;max-width:66%">
-        <div class="card col"><div class="lbl"><span style="color:var(--heal);font:700 12px/1 var(--mono)">04</span> REPAIR</div><p class="mt-s">Swap only <span class="tok">regex</span>→<span class="tok-new">pattern</span>, byte-identical elsewhere.</p></div>
-        <div class="card col"><div class="lbl"><span style="color:var(--heal);font:700 12px/1 var(--mono)">05</span> GATE</div><p class="mt-s">Clean rename → high confidence → <b style="color:var(--heal)">opens a PR</b>.</p></div>
+        <div class="card col"><span class="num">04</span><h3 class="mt-s">Repair</h3><p>Swap only <span class="tok">regex</span>→<span class="tok-new">pattern</span>. Nothing else.</p></div>
+        <div class="card col"><span class="num">05</span><h3 class="mt-s">Gate</h3><p>Sure? <b style="color:var(--heal)">Open a PR.</b> Unsure? Ask a human.</p></div>
       </div>
     </div>
   </section>
 
-  <!-- 4 · MAPPING -->
+  <!-- 11 · DETECT -->
   <section class="slide dark">
-    <div class="step-pill"><span class="num">STEP 02</span> MAP · the core idea</div>
-    <h2 class="mt-l">How does it know the doc is about <code>Query</code>?</h2>
-    <p class="lede mt-s">Nothing formally links them — so it matches the <b style="color:var(--text)">names both sides share</b>. More overlap = stronger link.</p>
+    <div class="step-pill"><span class="num">STEP 01</span> DETECT</div>
+    <h2 class="mt-l">Read the change as facts, not text.</h2>
+    <p class="lede mt-s">DocGuard parses both versions of the code and compares the <em>list of settings</em> — so it sees a rename, not just “some text changed”.</p>
+    <div class="row mt-l grow" style="align-items:center">
+      <div class="col code"><div class="bar"><span style="color:var(--faint)">before → after</span></div>
+        <pre><span class="ctx" style="padding-left:0">Query settings (old): …min_length, max_length, </span><span class="tok">regex</span><span class="ctx" style="padding-left:0">Query settings (new): …min_length, max_length, </span><span class="tok-new">pattern</span></pre></div>
+      <div class="col"><ul class="clean">
+        <li>One name removed (<span class="tok">regex</span>), one added (<span class="tok-new">pattern</span>) → <b>a rename</b></li>
+        <li>The old name <span class="tok">regex</span> becomes the <b>thing to hunt for</b> in the docs</li>
+        <li>Same logic in <b>Python, TypeScript, JavaScript &amp; Java</b></li>
+      </ul></div>
+    </div>
+  </section>
+
+  <!-- 12 · MAP (the heart) -->
+  <section class="slide dark">
+    <div class="step-pill"><span class="num">STEP 02</span> MAP · the key idea</div>
+    <h2 class="mt-l">How does it know this doc is about <code>Query</code>?</h2>
+    <p class="lede mt-s">Nothing formally links code and docs. So DocGuard matches the <b style="color:var(--text)">names both sides share</b>. More overlap = stronger match.</p>
     <div class="maps mt-l grow" style="align-items:center">
-      <div class="maplist"><div class="h">code · Query() params</div>
+      <div class="maplist"><div class="h">code · Query's settings</div>
         <span class="sym match">alias</span><span class="sym match">title</span><span class="sym match">min_length</span><span class="sym match">max_length</span><span class="sym match">deprecated</span><span class="sym stale">regex → pattern</span></div>
-      <div class="maparrow"><span class="big">⇄</span><span class="lab">5 shared names → strong link</span></div>
-      <div class="maplist"><div class="h">doc · “Recap” symbols</div>
+      <div class="maparrow"><span class="b">⇄</span><span class="l">5 shared names → strong link</span></div>
+      <div class="maplist"><div class="h">doc · the “Recap” section</div>
         <span class="sym match">alias</span><span class="sym match">title</span><span class="sym match">min_length</span><span class="sym match">max_length</span><span class="sym match">deprecated</span><span class="sym stale">regex</span></div>
     </div>
-    <div class="callout mt-l">If names don't match, it falls back to <b>meaning</b> (embeddings) — and if still unsure, it asks a human instead of guessing.</div>
+    <div class="callout mt-l">If the names don't match (a rewritten paragraph), it falls back to <b>meaning</b> — and if it's still unsure, it asks a human instead of guessing.</div>
   </section>
 
-  <!-- 5 · RESULT -->
+  <!-- 13 · VERIFY -->
   <section class="slide dark">
-    <div class="kicker"><span class="eyebrow">The result · real output</span><span class="n">/ 05</span></div>
-    <h2>DocGuard's fix == the human's fix. 60 days sooner.</h2>
+    <div class="step-pill"><span class="num">STEP 03</span> VERIFY</div>
+    <h2 class="mt-l">Is it <em>actually</em> wrong — or just related?</h2>
+    <p class="lede mt-s">A match isn't enough. Not every change breaks a doc. DocGuard checks the one concrete thing that changed.</p>
     <div class="row mt-l grow" style="align-items:center">
-      <div class="col">
-        <div class="code"><div class="bar"><span class="dot" style="background:#2dd4a7"></span><span style="margin-left:4px">DocGuard — real offline run</span></div>
-          <pre><span class="ctx" style="padding-left:0">stale docs detected: 1 | auto-fix: 1 | review: 0</span><span class="ctx" style="padding-left:0">section: Query Parameters… / Recap</span><span class="del">* `regex`</span><span class="add">* `pattern`</span></pre></div>
-        <div class="callout mt">Generated automatically from the code diff — identical to human PR #10085.</div>
-      </div>
-      <div class="col" style="max-width:42%">
-        <div class="chips"><span class="chip hl">python · ts · js · java</span><span class="chip hl">runs in CI on every PR</span><span class="chip">byte-identical outside the fix</span><span class="chip warn">unsure → human review</span></div>
+      <div class="col code"><div class="bar"><span style="color:var(--faint)">the check</span></div>
+        <pre><span class="ctx" style="padding-left:0">change:  setting renamed  </span><span class="tok">regex</span><span class="ctx" style="padding-left:0"> → </span><span class="tok-new">pattern</span><span class="ctx" style="padding-left:0">linked doc still contains “</span><span class="tok">regex</span><span class="ctx" style="padding-left:0">” ?</span><span class="add">  YES → verdict: STALE</span></pre></div>
+      <div class="col"><ul class="clean">
+        <li>The old word <span class="tok">regex</span> is <b>still literally in the doc</b> → provably out of date</li>
+        <li>If the doc already said <span class="tok-new">pattern</span> → “fine, do nothing”</li>
+        <li>It matches a <b>fact that changed</b>, not a vibe → very few false alarms</li>
+      </ul></div>
+    </div>
+  </section>
+
+  <!-- 14 · REPAIR -->
+  <section class="slide dark">
+    <div class="step-pill"><span class="num">STEP 04</span> REPAIR</div>
+    <h2 class="mt-l">Change the one word. Touch nothing else.</h2>
+    <div class="row mt-l grow" style="align-items:center">
+      <div class="col"><div class="lbl"><span class="d" style="background:var(--drift)"></span> before</div>
+        <div class="code mt-s"><div class="bar">query-params-str-validations.md</div>
+          <pre><span class="ctx" style="padding-left:0">* `min_length`</span><span class="ctx" style="padding-left:0">* `max_length`</span><span class="del">* `regex`</span></pre></div></div>
+      <div class="col"><div class="lbl"><span class="d" style="background:var(--heal)"></span> after · DocGuard's fix</div>
+        <div class="code mt-s"><div class="bar">query-params-str-validations.md · auto</div>
+          <pre><span class="ctx" style="padding-left:0">* `min_length`</span><span class="ctx" style="padding-left:0">* `max_length`</span><span class="add">* `pattern`</span></pre></div></div>
+    </div>
+    <div class="callout mt-l"><b>Surgical:</b> only <span class="tok">regex</span> becomes <span class="tok-new">pattern</span>. Every other line — headings, order, spacing — stays exactly the same.</div>
+  </section>
+
+  <!-- 15 · GATE + RESULT -->
+  <section class="slide dark">
+    <div class="step-pill"><span class="num">STEP 05</span> GATE → the result</div>
+    <h2 class="mt-l">DocGuard's fix == the human's fix. 60 days sooner.</h2>
+    <div class="row mt-l grow" style="align-items:center">
+      <div class="col"><div class="code"><div class="bar"><span class="dot" style="background:#2dd4a7"></span><span style="margin-left:4px">DocGuard — real output</span></div>
+        <pre><span class="ctx" style="padding-left:0">stale docs detected: 1 | auto-fix: 1 | review: 0</span><span class="ctx" style="padding-left:0">section: Query Parameters… / Recap</span><span class="del">* `regex`</span><span class="add">* `pattern`</span></pre></div>
+        <div class="cap">Generated automatically from the code diff — identical to human PR #10085.</div></div>
+      <div class="col" style="max-width:40%">
+        <div class="card"><div class="lbl"><span class="d" style="background:var(--heal)"></span> Sure → opens a PR</div><p>Clean rename → drafts the doc fix for a human to click merge.</p></div>
+        <div class="card mt" style="border-color:#7a5a22"><div class="lbl"><span class="d" style="background:var(--stale)"></span> Unsure → asks a human</div><p>Deleted features or fuzzy prose → flagged, never auto-rewritten.</p></div>
       </div>
     </div>
   </section>
 
-  <!-- 6 · CLOSE -->
-  <section class="slide" id="s-close" style="background:#000;padding:0;overflow:hidden">
+  <!-- 16 · WHAT IT DOES / DOESN'T (clarity) -->
+  <section class="slide dark center">
+    <div class="kicker"><span class="eyebrow">To avoid confusion</span><span class="n">/ 16</span></div>
+    <h2>It's a proofreader, not an author.</h2>
+    <div class="row mt-l">
+      <div class="col card" style="border-color:var(--heal-dim)"><div class="lbl"><span class="d" style="background:var(--heal)"></span> what it does</div>
+        <ul class="clean mt-s">
+          <li><b>Fixes docs that already exist</b> when code makes them wrong</li>
+          <li>Edits the <b>separate doc files</b> (Markdown pages people read)</li>
+          <li>Changes only the stale words</li>
+        </ul></div>
+      <div class="col card" style="border-color:#7a5a22"><div class="lbl"><span class="d" style="background:var(--stale)"></span> what it does NOT do</div>
+        <ul class="clean mt-s">
+          <li><b>Doesn't invent</b> new docs for undocumented code</li>
+          <li>Doesn't edit code comments — the real product docs</li>
+          <li>Doesn't guess when it's unsure — it asks</li>
+        </ul></div>
+    </div>
+    <div class="callout mt-l">Fixing an existing sentence is safe. Writing a whole page from scratch would mean the AI guessing — so it doesn't.</div>
+  </section>
+
+  <!-- 17 · UNIVERSAL / SCALE -->
+  <section class="slide dark">
+    <div class="kicker"><span class="eyebrow">Why it scales</span><span class="n">/ 17</span></div>
+    <h2>One missed word today. Every repo, every language, tomorrow.</h2>
+    <div class="row mt-l" style="gap:18px">
+      <div class="col stat"><div class="v">60→0</div><div class="k">days of drift, gone</div></div>
+      <div class="col stat"><div class="v">4</div><div class="k">languages · py · ts · js · java</div></div>
+      <div class="col stat"><div class="v">0</div><div class="k">humans needed to catch it</div></div>
+      <div class="col stat"><div class="v">1</div><div class="k">CI check, every PR</div></div>
+    </div>
+    <div class="row mt-l grow"><div class="col" style="display:flex;align-items:center"><ul class="clean">
+      <li>The same 5 steps run for a <b>TypeScript</b> prop or a <b>Java</b> method change</li>
+      <li>Cheap: it filters candidates <b>before</b> any AI call — most PRs cost nothing</li>
+      <li>Ships as a <b>GitHub Action</b> — drops into existing CI, no code changes</li>
+    </ul></div></div>
+  </section>
+
+  <!-- 18 · CLOSE (particles) -->
+  <section class="slide" id="s-close">
     <canvas id="close-canvas"></canvas>
     <div class="hero-ui" style="justify-content:center;align-items:flex-start">
       <div>
@@ -190,181 +379,58 @@
 </div>
 
 <div class="foot">
-  <div class="fb">Doc<span style="color:var(--heal)">Guard</span> · particle edition</div>
+  <div class="fb">Doc<span style="color:var(--heal)">Guard</span></div>
   <div class="dots" id="dots"></div>
-  <div class="fb" id="fb-r">01 / 06</div>
+  <div class="fb" id="fb-r">01 / 18</div>
 </div>
 
 <script>
-/* ============================================================
-   Particle text engine — ported from the pasted React/canvas
-   component (particle-text-effect.tsx) to framework-free JS.
-   Same physics: seek target, blend colour, motion-blur trail.
-   ============================================================ */
-function initParticleText(canvas, words, opts){
-  opts = opts || {};
-  const pixelSteps = opts.pixelSteps || 6;
-  const drawAsPoints = true;
-  // on-brand vibrant palette instead of full random rainbow
+/* Particle text engine — ported from the pasted particle-text-effect.tsx to framework-free JS. */
+function initParticleText(canvas, words){
+  const pixelSteps = 6;
   const PALETTE = [[45,212,167],[119,169,255],[143,240,207],[245,177,76],[180,140,255],[80,220,200]];
   const mouse = {x:0,y:0,isPressed:false,isRightClick:false};
   let particles = [], frame = 0, wordIndex = 0, raf = null, running = false;
-
-  function randPos(x,y,mag){
-    const rx = Math.random()*canvas.width, ry = Math.random()*canvas.height;
-    let dx = rx-x, dy = ry-y; const m = Math.hypot(dx,dy);
-    if(m>0){dx=dx/m*mag; dy=dy/m*mag;}
-    return {x:x+dx, y:y+dy};
-  }
-  function mkParticle(){
-    const p = {
-      pos:{x:0,y:0}, vel:{x:0,y:0}, acc:{x:0,y:0}, target:{x:0,y:0},
-      closeEnough:100, maxSpeed:1, maxForce:.1, size:10, killed:false,
-      startColor:{r:0,g:0,b:0}, targetColor:{r:0,g:0,b:0}, cw:0, blend:.01,
-    };
-    return p;
-  }
-  function move(p){
-    let prox = 1;
-    const d = Math.hypot(p.pos.x-p.target.x, p.pos.y-p.target.y);
-    if(d < p.closeEnough) prox = d/p.closeEnough;
-    let tx = p.target.x-p.pos.x, ty = p.target.y-p.pos.y;
-    const m = Math.hypot(tx,ty);
-    if(m>0){tx=tx/m*p.maxSpeed*prox; ty=ty/m*p.maxSpeed*prox;}
-    let sx = tx-p.vel.x, sy = ty-p.vel.y; const sm = Math.hypot(sx,sy);
-    if(sm>0){sx=sx/sm*p.maxForce; sy=sy/sm*p.maxForce;}
-    p.acc.x+=sx; p.acc.y+=sy;
-    p.vel.x+=p.acc.x; p.vel.y+=p.acc.y;
-    p.pos.x+=p.vel.x; p.pos.y+=p.vel.y;
-    p.acc.x=0; p.acc.y=0;
-  }
-  function draw(ctx,p){
-    if(p.cw<1) p.cw = Math.min(p.cw+p.blend,1);
-    const c = {
-      r:Math.round(p.startColor.r+(p.targetColor.r-p.startColor.r)*p.cw),
-      g:Math.round(p.startColor.g+(p.targetColor.g-p.startColor.g)*p.cw),
-      b:Math.round(p.startColor.b+(p.targetColor.b-p.startColor.b)*p.cw),
-    };
-    ctx.fillStyle = `rgb(${c.r},${c.g},${c.b})`;
-    ctx.fillRect(p.pos.x, p.pos.y, 2.4, 2.4);
-  }
-  function kill(p){
-    if(p.killed) return;
-    const r = randPos(canvas.width/2, canvas.height/2, (canvas.width+canvas.height)/2);
-    p.target.x=r.x; p.target.y=r.y;
-    p.startColor = {
-      r:p.startColor.r+(p.targetColor.r-p.startColor.r)*p.cw,
-      g:p.startColor.g+(p.targetColor.g-p.startColor.g)*p.cw,
-      b:p.startColor.b+(p.targetColor.b-p.startColor.b)*p.cw};
-    p.targetColor={r:0,g:0,b:0}; p.cw=0; p.killed=true;
-  }
-  function nextWord(word){
-    const off = document.createElement("canvas");
-    off.width = canvas.width; off.height = canvas.height;
-    const octx = off.getContext("2d");
-    octx.fillStyle="white";
-    // fit font to width so long words don't clip
-    let fs = Math.round(canvas.height*0.34);
-    octx.font = `bold ${fs}px Arial`;
-    while(octx.measureText(word).width > canvas.width*0.86 && fs > 24){ fs-=4; octx.font=`bold ${fs}px Arial`; }
-    octx.textAlign="center"; octx.textBaseline="middle";
-    octx.fillText(word, canvas.width/2, canvas.height/2);
-    const px = octx.getImageData(0,0,canvas.width,canvas.height).data;
-    const nc = PALETTE[Math.floor(Math.random()*PALETTE.length)];
-    const newColor = {r:nc[0], g:nc[1], b:nc[2]};
-    let pi = 0;
-    const idx = [];
-    for(let i=0;i<px.length;i+=pixelSteps*4) idx.push(i);
-    for(let i=idx.length-1;i>0;i--){const j=Math.floor(Math.random()*(i+1)); [idx[i],idx[j]]=[idx[j],idx[i]];}
-    for(const ci of idx){
-      if(px[ci+3] > 0){
-        const x=(ci/4)%canvas.width, y=Math.floor(ci/4/canvas.width);
-        let p;
-        if(pi<particles.length){ p=particles[pi]; p.killed=false; pi++; }
-        else{
-          p=mkParticle();
-          const r=randPos(canvas.width/2,canvas.height/2,(canvas.width+canvas.height)/2);
-          p.pos.x=r.x; p.pos.y=r.y;
-          p.maxSpeed=Math.random()*6+4; p.maxForce=p.maxSpeed*.05;
-          p.size=Math.random()*6+6; p.blend=Math.random()*.0275+.0025;
-          particles.push(p);
-        }
-        p.startColor={r:p.startColor.r+(p.targetColor.r-p.startColor.r)*p.cw,
-                      g:p.startColor.g+(p.targetColor.g-p.startColor.g)*p.cw,
-                      b:p.startColor.b+(p.targetColor.b-p.startColor.b)*p.cw};
-        p.targetColor=newColor; p.cw=0; p.target.x=x; p.target.y=y;
-      }
-    }
-    for(let i=pi;i<particles.length;i++) kill(particles[i]);
-  }
-  function loop(){
-    const ctx = canvas.getContext("2d");
-    ctx.fillStyle="rgba(0,0,0,0.10)";
-    ctx.fillRect(0,0,canvas.width,canvas.height);
-    for(let i=particles.length-1;i>=0;i--){
-      const p=particles[i]; move(p); draw(ctx,p);
-      if(p.killed && (p.pos.x<0||p.pos.x>canvas.width||p.pos.y<0||p.pos.y>canvas.height)) particles.splice(i,1);
-    }
-    if(mouse.isPressed && mouse.isRightClick){
-      particles.forEach(p=>{ if(Math.hypot(p.pos.x-mouse.x,p.pos.y-mouse.y)<50) kill(p); });
-    }
-    frame++;
-    if(frame % 220 === 0){ wordIndex=(wordIndex+1)%words.length; nextWord(words[wordIndex]); }
-    raf = requestAnimationFrame(loop);
-  }
-  function size(){
-    const r = canvas.getBoundingClientRect();
-    canvas.width = Math.max(640, Math.floor(r.width));
-    canvas.height = Math.max(360, Math.floor(r.height));
-  }
-  function onDown(e){mouse.isPressed=true; mouse.isRightClick=e.button===2; const r=canvas.getBoundingClientRect();
-    mouse.x=(e.clientX-r.left)*(canvas.width/r.width); mouse.y=(e.clientY-r.top)*(canvas.height/r.height);}
-  function onMove(e){const r=canvas.getBoundingClientRect();
-    mouse.x=(e.clientX-r.left)*(canvas.width/r.width); mouse.y=(e.clientY-r.top)*(canvas.height/r.height);}
-  function onUp(){mouse.isPressed=false; mouse.isRightClick=false;}
-  canvas.addEventListener("mousedown",onDown);
-  canvas.addEventListener("mousemove",onMove);
-  canvas.addEventListener("mouseup",onUp);
+  function randPos(x,y,mag){const rx=Math.random()*canvas.width,ry=Math.random()*canvas.height;let dx=rx-x,dy=ry-y;const m=Math.hypot(dx,dy);if(m>0){dx=dx/m*mag;dy=dy/m*mag;}return {x:x+dx,y:y+dy};}
+  function mk(){return {pos:{x:0,y:0},vel:{x:0,y:0},acc:{x:0,y:0},target:{x:0,y:0},closeEnough:100,maxSpeed:1,maxForce:.1,size:10,killed:false,startColor:{r:0,g:0,b:0},targetColor:{r:0,g:0,b:0},cw:0,blend:.01};}
+  function move(p){let prox=1;const d=Math.hypot(p.pos.x-p.target.x,p.pos.y-p.target.y);if(d<p.closeEnough)prox=d/p.closeEnough;let tx=p.target.x-p.pos.x,ty=p.target.y-p.pos.y;const m=Math.hypot(tx,ty);if(m>0){tx=tx/m*p.maxSpeed*prox;ty=ty/m*p.maxSpeed*prox;}let sx=tx-p.vel.x,sy=ty-p.vel.y;const sm=Math.hypot(sx,sy);if(sm>0){sx=sx/sm*p.maxForce;sy=sy/sm*p.maxForce;}p.acc.x+=sx;p.acc.y+=sy;p.vel.x+=p.acc.x;p.vel.y+=p.acc.y;p.pos.x+=p.vel.x;p.pos.y+=p.vel.y;p.acc.x=0;p.acc.y=0;}
+  function draw(ctx,p){if(p.cw<1)p.cw=Math.min(p.cw+p.blend,1);const c={r:Math.round(p.startColor.r+(p.targetColor.r-p.startColor.r)*p.cw),g:Math.round(p.startColor.g+(p.targetColor.g-p.startColor.g)*p.cw),b:Math.round(p.startColor.b+(p.targetColor.b-p.startColor.b)*p.cw)};ctx.fillStyle=`rgb(${c.r},${c.g},${c.b})`;ctx.fillRect(p.pos.x,p.pos.y,2.4,2.4);}
+  function kill(p){if(p.killed)return;const r=randPos(canvas.width/2,canvas.height/2,(canvas.width+canvas.height)/2);p.target.x=r.x;p.target.y=r.y;p.startColor={r:p.startColor.r+(p.targetColor.r-p.startColor.r)*p.cw,g:p.startColor.g+(p.targetColor.g-p.startColor.g)*p.cw,b:p.startColor.b+(p.targetColor.b-p.startColor.b)*p.cw};p.targetColor={r:0,g:0,b:0};p.cw=0;p.killed=true;}
+  function nextWord(word){const off=document.createElement("canvas");off.width=canvas.width;off.height=canvas.height;const octx=off.getContext("2d");octx.fillStyle="white";let fs=Math.round(canvas.height*0.34);octx.font=`bold ${fs}px Arial`;while(octx.measureText(word).width>canvas.width*0.86&&fs>24){fs-=4;octx.font=`bold ${fs}px Arial`;}octx.textAlign="center";octx.textBaseline="middle";octx.fillText(word,canvas.width/2,canvas.height/2);const px=octx.getImageData(0,0,canvas.width,canvas.height).data;const nc=PALETTE[Math.floor(Math.random()*PALETTE.length)];const newColor={r:nc[0],g:nc[1],b:nc[2]};let pi=0;const idx=[];for(let i=0;i<px.length;i+=pixelSteps*4)idx.push(i);for(let i=idx.length-1;i>0;i--){const j=Math.floor(Math.random()*(i+1));[idx[i],idx[j]]=[idx[j],idx[i]];}for(const ci of idx){if(px[ci+3]>0){const x=(ci/4)%canvas.width,y=Math.floor(ci/4/canvas.width);let p;if(pi<particles.length){p=particles[pi];p.killed=false;pi++;}else{p=mk();const r=randPos(canvas.width/2,canvas.height/2,(canvas.width+canvas.height)/2);p.pos.x=r.x;p.pos.y=r.y;p.maxSpeed=Math.random()*6+4;p.maxForce=p.maxSpeed*.05;p.size=Math.random()*6+6;p.blend=Math.random()*.0275+.0025;particles.push(p);}p.startColor={r:p.startColor.r+(p.targetColor.r-p.startColor.r)*p.cw,g:p.startColor.g+(p.targetColor.g-p.startColor.g)*p.cw,b:p.startColor.b+(p.targetColor.b-p.startColor.b)*p.cw};p.targetColor=newColor;p.cw=0;p.target.x=x;p.target.y=y;}}for(let i=pi;i<particles.length;i++)kill(particles[i]);}
+  function loop(){const ctx=canvas.getContext("2d");ctx.fillStyle="rgba(0,0,0,0.10)";ctx.fillRect(0,0,canvas.width,canvas.height);for(let i=particles.length-1;i>=0;i--){const p=particles[i];move(p);draw(ctx,p);if(p.killed&&(p.pos.x<0||p.pos.x>canvas.width||p.pos.y<0||p.pos.y>canvas.height))particles.splice(i,1);}if(mouse.isPressed&&mouse.isRightClick){particles.forEach(p=>{if(Math.hypot(p.pos.x-mouse.x,p.pos.y-mouse.y)<50)kill(p);});}frame++;if(frame%220===0){wordIndex=(wordIndex+1)%words.length;nextWord(words[wordIndex]);}raf=requestAnimationFrame(loop);}
+  function size(){const r=canvas.getBoundingClientRect();canvas.width=Math.max(640,Math.floor(r.width));canvas.height=Math.max(360,Math.floor(r.height));}
+  canvas.addEventListener("mousedown",e=>{mouse.isPressed=true;mouse.isRightClick=e.button===2;const r=canvas.getBoundingClientRect();mouse.x=(e.clientX-r.left)*(canvas.width/r.width);mouse.y=(e.clientY-r.top)*(canvas.height/r.height);});
+  canvas.addEventListener("mousemove",e=>{const r=canvas.getBoundingClientRect();mouse.x=(e.clientX-r.left)*(canvas.width/r.width);mouse.y=(e.clientY-r.top)*(canvas.height/r.height);});
+  canvas.addEventListener("mouseup",()=>{mouse.isPressed=false;mouse.isRightClick=false;});
   canvas.addEventListener("contextmenu",e=>e.preventDefault());
-
-  return {
-    start(){ if(running) return; running=true; size(); if(particles.length===0){ wordIndex=0; nextWord(words[0]); } loop(); },
-    stop(){ running=false; if(raf) cancelAnimationFrame(raf); raf=null; },
-  };
+  return {start(){if(running)return;running=true;size();if(particles.length===0){wordIndex=0;nextWord(words[0]);}loop();},stop(){running=false;if(raf)cancelAnimationFrame(raf);raf=null;}};
 }
-
-/* ---- deck navigation, wiring particle canvases to their slides ---- */
 const slides=[...document.querySelectorAll('.slide')];
-const dots=document.getElementById('dots'), prog=document.getElementById('prog'), fbR=document.getElementById('fb-r');
+const dots=document.getElementById('dots'),prog=document.getElementById('prog'),fbR=document.getElementById('fb-r');
 let i=0;
 slides.forEach((_,k)=>{const d=document.createElement('i');d.onclick=()=>go(k);dots.appendChild(d);});
 const dEls=[...dots.children];
-
-const hero = initParticleText(document.getElementById('hero-canvas'),
-  ["DocGuard","STALE DOCS","regex","pattern","HEALED","DocGuard"]);
-const close = initParticleText(document.getElementById('close-canvas'),
-  ["SELF","HEALING","DOCS","py ts js java","DocGuard"]);
-
+const hero=initParticleText(document.getElementById('hero-canvas'),["DocGuard","STALE DOCS","regex","pattern","HEALED","DocGuard"]);
+const close=initParticleText(document.getElementById('close-canvas'),["SELF","HEALING","DOCS","py ts js java","DocGuard"]);
 function go(n){
   i=Math.max(0,Math.min(slides.length-1,n));
   slides.forEach((s,k)=>s.classList.toggle('on',k===i));
   dEls.forEach((d,k)=>d.classList.toggle('on',k===i));
   prog.style.width=((i+1)/slides.length*100)+'%';
   fbR.textContent=String(i+1).padStart(2,'0')+' / '+String(slides.length).padStart(2,'0');
-  // run each particle canvas only while its slide is showing
-  if(slides[i].id==='s-hero') hero.start(); else hero.stop();
-  if(slides[i].id==='s-close') close.start(); else close.stop();
+  if(slides[i].id==='s-hero')hero.start();else hero.stop();
+  if(slides[i].id==='s-close')close.start();else close.stop();
 }
 document.addEventListener('keydown',e=>{
   if(e.key==='ArrowRight'||e.key===' '||e.key==='PageDown'){e.preventDefault();go(i+1);}
   else if(e.key==='ArrowLeft'||e.key==='PageUp'){e.preventDefault();go(i-1);}
-  else if(e.key==='Home')go(0); else if(e.key==='End')go(slides.length-1);
+  else if(e.key==='Home')go(0);else if(e.key==='End')go(slides.length-1);
   else if(e.key==='f'||e.key==='F'){document.fullscreenElement?document.exitFullscreen():document.documentElement.requestFullscreen();}
   else if(e.key==='p'||e.key==='P')window.print();
 });
 let sx=0;addEventListener('touchstart',e=>sx=e.touches[0].clientX,{passive:true});
 addEventListener('touchend',e=>{const dx=e.changedTouches[0].clientX-sx;if(Math.abs(dx)>50)go(i+(dx<0?1:-1));},{passive:true});
-addEventListener('resize',()=>{ if(slides[i].id==='s-hero'){hero.stop();hero.start();} if(slides[i].id==='s-close'){close.stop();close.start();} });
+addEventListener('resize',()=>{if(slides[i].id==='s-hero'){hero.stop();hero.start();}if(slides[i].id==='s-close'){close.stop();close.start();}});
 go(0);
 </script>
 </body>
