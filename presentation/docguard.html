@@ -193,21 +193,23 @@
     <div class="kicker"><span class="eyebrow">What DocGuard does</span><span class="n">/ 04</span></div>
     <h2>Read the diff. Fix only what it broke.</h2>
     <p class="lede mt-s">On every push, DocGuard runs one deterministic pipeline — cheap filters first, an LLM only where it matters.</p>
-    <div class="pipe mt grow" style="align-items:center;flex:0">
-      <div class="step"><div class="num">01</div><div class="t mt-s">Detect</div><div class="d">parse code diff → changed units + params</div></div>
-      <div class="arrow">→</div>
-      <div class="step"><div class="num">02</div><div class="t mt-s">Map</div><div class="d">link changed code → the doc sections about it</div></div>
-      <div class="arrow">→</div>
-      <div class="step"><div class="num">03</div><div class="t mt-s">Verify</div><div class="d">is this section actually stale now?</div></div>
-      <div class="arrow">→</div>
-      <div class="step"><div class="num">04</div><div class="t mt-s">Repair</div><div class="d">targeted fix — untouched text stays byte-identical</div></div>
-      <div class="arrow">→</div>
-      <div class="step"><div class="num">05</div><div class="t mt-s">Gate</div><div class="d">confident → open PR · unsure → review comment</div></div>
-    </div>
-    <div class="grid3 mt">
-      <div class="card"><span class="ic">◇</span><h3>Cost-aware</h3><p>Mapping filters candidates before any model call; only meaningful changes are verified.</p></div>
-      <div class="card"><span class="ic">⤳</span><h3>Surgical</h3><p>Repairs change the stale fact and nothing else — no reformatting, no drift-in-disguise.</p></div>
-      <div class="card"><span class="ic">⛨</span><h3>Safe by default</h3><p>Offline mock providers ship by default; real LLM &amp; GitHub are opt-in behind interfaces.</p></div>
+    <div class="grow" style="display:flex;flex-direction:column;justify-content:center;gap:clamp(22px,4.5vh,52px)">
+      <div class="pipe" style="align-items:stretch">
+        <div class="step"><div class="num">01</div><div class="t mt-s">Detect</div><div class="d">parse code diff → changed units + params</div></div>
+        <div class="arrow">→</div>
+        <div class="step"><div class="num">02</div><div class="t mt-s">Map</div><div class="d">link changed code → the doc sections about it</div></div>
+        <div class="arrow">→</div>
+        <div class="step"><div class="num">03</div><div class="t mt-s">Verify</div><div class="d">is this section actually stale now?</div></div>
+        <div class="arrow">→</div>
+        <div class="step"><div class="num">04</div><div class="t mt-s">Repair</div><div class="d">targeted fix — untouched text stays byte-identical</div></div>
+        <div class="arrow">→</div>
+        <div class="step"><div class="num">05</div><div class="t mt-s">Gate</div><div class="d">confident → open PR · unsure → review comment</div></div>
+      </div>
+      <div class="grid3">
+        <div class="card"><span class="ic">◇</span><h3>Cost-aware</h3><p>Mapping filters candidates before any model call; only meaningful changes are verified.</p></div>
+        <div class="card"><span class="ic">⤳</span><h3>Surgical</h3><p>Repairs change the stale fact and nothing else — no reformatting, no drift-in-disguise.</p></div>
+        <div class="card"><span class="ic">⛨</span><h3>Safe by default</h3><p>Offline mock providers ship by default; real LLM &amp; GitHub are opt-in behind interfaces.</p></div>
+      </div>
     </div>
   </section>
 
