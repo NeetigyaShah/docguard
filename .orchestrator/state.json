@@ -13,16 +13,17 @@
   "integration_branch": "integration",
   "phases_passed": [0, 1, 2, 3, 4, 5, 6],
   "real_world_eval": {
-    "repos": ["pydantic", "fastapi"],
+    "repos": ["pydantic", "fastapi", "httpx"],
     "evidence": "docs/eval/*.json + README 'Real-world evaluation'",
-    "findings": "Zero false positives on real repos. Mock = high-precision structural baseline, LOW recall. Hand-verified Pydantic Field(frozen=) rename: mock flags stale + surgical fix; real DeepSeek LLM flags stale (correct reasoning) but repair returned no change.",
-    "real_llm": "OpenAI-compatible NVIDIA endpoint wired via .env (DOCGUARD_OPENAI_BASE_URL, model deepseek-ai/deepseek-v4-flash). Works; slow ~30-70s/call."
+    "findings": "Zero false positives on real repos. Session-3 fresh repo = httpx (tutorial-heavy docs): mock eval 12/12 targets, precision=recall=F1=1.0, fp=0 (mapping-precision fix holds on a repo full of quickstart/async/advanced prose). Real DeepSeek eval on generic first-param targets (method/url) correctly declined to flag -> conservative, not a false positive. real-LLM REPAIR NO-CHANGE BUG FIXED + live-confirmed: Pydantic Field(frozen->is_frozen) and httpx follow_redirects->allow_redirects both verdict=stale conf=1.0 with repair changed=True, fixing BOTH prose and the code-example line (mock only patched backticked prose).",
+    "real_llm": "OpenAI-compatible NVIDIA endpoint wired via .env (DOCGUARD_OPENAI_BASE_URL, model deepseek-ai/deepseek-v4-flash). Works; slow ~30-70s/call. Repro: scripts/real_case_demo.py (pydantic), scripts/httpx_case_demo.py (httpx)."
   },
   "open_followups": [
-    "DONE (offline) session-3: real-LLM repair now feeds the NEW code + stale_claims + scope into the repair prompt (root cause: model never saw what to repair toward, so it echoed), adds ASD-STE100 style constraints for minimal diffs, salvages malformed JSON, and fills unified_diff. Contract covered by H-04..H-07. STILL TO CONFIRM: one live DeepSeek run to verify the endpoint now returns an applied change (needs .env key, ~30-70s/call).",
-    "DONE (offline) session-3: code->doc mapping precision. _exact now requires a documentation signal (symbol in heading, repeated, defined/called, or short focused blurb) instead of any lone inline mention -> kills tutorial over-linking. Knob: _SHORT_SECTION in mapper.py. Covered by H-01..H-03.",
-    "OPTIONAL: faster LLM endpoint for CI; real GitHub Action E2E on a live repo (BLK-GH); re-run scripts/eval_realrepo.py to measure the precision gain on pydantic/fastapi."
+    "DONE + LIVE-CONFIRMED session-3: real-LLM repair feeds NEW code + stale_claims + scope + ASD-STE100 constraints; salvages malformed JSON; fills unified_diff. Root cause was the prompt withholding the new code. Verified live on pydantic + httpx (repair changed=True, correct diffs). Contract tests H-04..H-07.",
+    "DONE + REAL-REPO-CONFIRMED session-3: code->doc mapping precision. _exact requires a documentation signal (heading / repeated / defined-or-called / short focused blurb <= _SHORT_SECTION) instead of any lone inline mention. httpx mock eval fp=0. Tests H-01..H-03.",
+    "NEW (session-3 finding): real-LLM full-section rewrite made a COLLATERAL edit -- HTML-escaped '>>>' -> '&gt;&gt;&gt;' in an untouched pycon block on the httpx case. The intended change was correct but byte-for-byte preservation of unrelated lines is not guaranteed on the real path (mock's surgical regex swap is). Harden: post-repair validate that only intended tokens changed (repair/validate.py scope_ok already exists but demo bypassed the gate), and/or unescape HTML entities the model introduces. Confidence gate routes such cases to human_review in the full pipeline.",
+    "OPTIONAL: faster LLM endpoint for CI; real GitHub Action E2E on a live repo (BLK-GH); larger real-repo recall study picking specific (non-generic) documented params."
   ],
-  "next_action": "Confirm real-LLM repair end-to-end with one live DeepSeek run (DOCGUARD_LLM_PROVIDER=openai, key in .env), then re-run eval_realrepo.py to quantify the mapping-precision gain. Core + offline hardening COMPLETE; 96 tests green, ruff+mypy clean.",
-  "updated": "build-session-3"
+  "next_action": "Harden real-LLM repair fidelity: reject/repair collateral edits (e.g. '>>>'->'&gt;' HTML-escaping) so unrelated lines stay byte-identical, then re-run scripts/httpx_case_demo.py to confirm a clean diff. Core + both follow-ups COMPLETE and live-confirmed; 96 tests green, ruff+mypy clean.",
+  "updated": "build-session-3-eval"
 }

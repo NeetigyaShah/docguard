@@ -1,0 +1,30 @@
+{
+  "repo": "D:\\_docguard_eval\\httpx",
+  "targets_tested": 2,
+  "tp": 0,
+  "fp": 0,
+  "fn": 2,
+  "negative_controls": 2,
+  "false_positives_on_negatives": 0,
+  "precision": 1.0,
+  "recall": 0.0,
+  "f1": 0.0,
+  "samples": [
+    {
+      "symbol": "request",
+      "param": "method",
+      "doc": "docs/advanced/authentication.md",
+      "flagged_stale": false,
+      "repair_generated": false,
+      "repair_preview": null
+    },
+    {
+      "symbol": "stream",
+      "param": "method",
+      "doc": "docs/async.md",
+      "flagged_stale": false,
+      "repair_generated": false,
+      "repair_preview": null
+    }
+  ]
+}

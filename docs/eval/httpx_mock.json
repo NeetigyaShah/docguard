@@ -1,0 +1,110 @@
+{
+  "repo": "D:\\_docguard_eval\\httpx",
+  "targets_tested": 12,
+  "tp": 12,
+  "fp": 0,
+  "fn": 0,
+  "negative_controls": 5,
+  "false_positives_on_negatives": 0,
+  "precision": 1.0,
+  "recall": 1.0,
+  "f1": 1.0,
+  "samples": [
+    {
+      "symbol": "request",
+      "param": "method",
+      "doc": "docs/advanced/authentication.md",
+      "flagged_stale": true,
+      "repair_generated": false,
+      "repair_preview": null
+    },
+    {
+      "symbol": "stream",
+      "param": "method",
+      "doc": "docs/async.md",
+      "flagged_stale": true,
+      "repair_generated": false,
+      "repair_preview": null
+    },
+    {
+      "symbol": "get",
+      "param": "url",
+      "doc": "docs/async.md",
+      "flagged_stale": true,
+      "repair_generated": false,
+      "repair_preview": null
+    },
+    {
+      "symbol": "options",
+      "param": "url",
+      "doc": "docs/async.md",
+      "flagged_stale": true,
+      "repair_generated": false,
+      "repair_preview": null
+    },
+    {
+      "symbol": "head",
+      "param": "url",
+      "doc": "docs/async.md",
+      "flagged_stale": true,
+      "repair_generated": false,
+      "repair_preview": null
+    },
+    {
+      "symbol": "post",
+      "param": "url",
+      "doc": "docs/async.md",
+      "flagged_stale": true,
+      "repair_generated": false,
+      "repair_preview": null
+    },
+    {
+      "symbol": "put",
+      "param": "url",
+      "doc": "docs/async.md",
+      "flagged_stale": true,
+      "repair_generated": false,
+      "repair_preview": null
+    },
+    {
+      "symbol": "patch",
+      "param": "url",
+      "doc": "docs/async.md",
+      "flagged_stale": true,
+      "repair_generated": false,
+      "repair_preview": null
+    },
+    {
+      "symbol": "delete",
+      "param": "url",
+      "doc": "docs/async.md",
+      "flagged_stale": true,
+      "repair_generated": false,
+      "repair_preview": null
+    },
+    {
+      "symbol": "Auth.auth_flow",
+      "param": "request",
+      "doc": "docs/advanced/authentication.md",
+      "flagged_stale": true,
+      "repair_generated": false,
+      "repair_preview": null
+    },
+    {
+      "symbol": "Auth.sync_auth_flow",
+      "param": "request",
+      "doc": "docs/advanced/authentication.md",
+      "flagged_stale": true,
+      "repair_generated": false,
+      "repair_preview": null
+    },
+    {
+      "symbol": "Auth.async_auth_flow",
+      "param": "request",
+      "doc": "docs/advanced/authentication.md",
+      "flagged_stale": true,
+      "repair_generated": false,
+      "repair_preview": null
+    }
+  ]
+}
