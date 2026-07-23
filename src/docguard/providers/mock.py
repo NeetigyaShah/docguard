@@ -92,6 +92,10 @@ def parse_params(source: str) -> list[tuple[str, str | None]]:
     return out
 
 
+# Neetigya, 2026-07-23: made the mock's rename/default/removed logic language-agnostic.
+# `_impact_params`, `_renames`, `_default_changes`, `_params_removed` now consume
+# structured `Param` lists (from any language's parser) instead of Python-only
+# `parse_params(source)` regex — the latter is kept only as a fallback below.
 def _impact_params(impact: ChangeImpact) -> tuple[list[Param], list[Param]]:
     """Prefer structured params (any language); fall back to parsing the Python
     source so hand-built impacts (without params) still work."""

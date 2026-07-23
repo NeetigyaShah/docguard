@@ -1,3 +1,4 @@
+# Neetigya, 2026-07-23: new file — Java extractor (universal-parser feature).
 """Java semantic parser → CodeUnit list, via tree-sitter (`java` grammar).
 
 Extracts top-level type declarations (class/interface/enum/record) and their

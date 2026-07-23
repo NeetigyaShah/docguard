@@ -1,3 +1,4 @@
+# Neetigya, 2026-07-23: new file — JavaScript/JSX extractor (universal-parser feature).
 """JavaScript semantic parser -> CodeUnit list, via tree-sitter.
 
 Extracts top-level functions, classes + their methods, and `const`/`let`/`var`

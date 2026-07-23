@@ -28,6 +28,10 @@ def _lexical(unit: CodeUnit, section: DocSection) -> float:
     return len(a & b) / len(a | b)
 
 
+# Neetigya, 2026-07-22: mapping-precision fix. `_exact` below was changed to require
+# a *documentation* signal (heading / repeat / definition / short focused blurb)
+# instead of any lone symbol mention — this stops tutorial over-linking. `_names`
+# and the `_SHORT_SECTION` knob above were added together for this fix.
 def _names(unit: CodeUnit) -> set[str]:
     leaf = unit.qualified_name.split(".")[-1].split(":")[-1]
     return {n for n in (unit.name, unit.qualified_name, leaf) if n}

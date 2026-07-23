@@ -1,3 +1,4 @@
+# Neetigya, 2026-07-23: new file — end-to-end multi-language proof (TS heal + Java flag).
 """End-to-end polyglot proof: the SAME analyze() pipeline heals docs for a
 non-Python repo. Guards the integration seam (universal parser -> detect -> map
 -> verify -> repair) that the per-language unit tests don't cover on their own.

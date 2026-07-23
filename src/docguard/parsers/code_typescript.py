@@ -1,3 +1,4 @@
+# Neetigya, 2026-07-23: new file — TypeScript/TSX extractor (universal-parser feature).
 """TypeScript → CodeUnit list, via tree-sitter (grammar 'typescript' / 'tsx').
 
 Extracts top-level functions, classes, class methods, and const/let arrow (or

@@ -1,3 +1,5 @@
+# Neetigya, 2026-07-23: new file — the universal parser router that made DocGuard
+# multi-language. Dispatches each source file to its per-language parser by extension.
 """Language-agnostic code parser: dispatch a source file to its parser.
 
 Every pipeline stage that used to call `parse_python_source` now calls

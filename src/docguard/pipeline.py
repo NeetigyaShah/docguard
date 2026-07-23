@@ -30,6 +30,8 @@ def analyze(
     settings = settings or load_settings()
     repo_path = Path(repo)
 
+    # Neetigya, 2026-07-23: parse via the universal router (parse_code_file /
+    # parse_code_source) so the whole pipeline heals docs for py/ts/js/java, not just Python.
     head_units = [u for f in find_code(repo, settings.src_path_list()) for u in parse_code_file(f, repo)]
     sections = [s for f in find_docs(repo, settings.docs_path_list()) for s in parse_markdown_file(f, repo)]
 

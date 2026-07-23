@@ -1,3 +1,4 @@
+# Neetigya, 2026-07-23: new file — TypeScript extractor tests.
 """TypeScript extractor: structural extraction + change-detection wiring."""
 
 from __future__ import annotations

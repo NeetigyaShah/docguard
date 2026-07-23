@@ -51,6 +51,11 @@ CHANGE KINDS: {[k.value for k in impact.change_kinds]}
 </untrusted>"""
 
 
+# Neetigya, 2026-07-22: real-LLM repair fix. Root cause of the old "returns no
+# change" bug was that the repair prompt never received the NEW code, so the model
+# echoed the input. Everything from here down (the ASD-STE100 system prompt, the
+# richer `_repair_prompt`, the salvaging `_parse_repaired`, `_unified_diff`, and the
+# rewritten `repair_section`) was added/changed together for that fix.
 # Simplified Technical English (ASD-STE100) — a compact, high-value subset. Constrains
 # the model to instruction-shaped prose, which yields minimal, reviewable diffs and
 # strips the "LLM smell" (synonyms, subordinate clauses) that makes repairs hard to gate.

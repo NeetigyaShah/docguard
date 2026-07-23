@@ -16,6 +16,11 @@ from docguard.changes.diff import changed_files, file_at
 from docguard.models import ChangeImpact, ChangeKind, CodeUnit, CodeUnitKind, Param
 from docguard.parsers.code import CODE_EXTENSIONS, parse_code_source
 
+# Neetigya, 2026-07-23: multi-language support. This module now imports the universal
+# parser (parse_code_source / CODE_EXTENSIONS) instead of the Python-only parser, and
+# `_sig_kinds` + classify_change were rewritten to diff structured `Param` lists instead
+# of re-parsing source with a Python `def` regex.
+
 
 def _comments(src: str) -> list[str]:
     try:
@@ -146,10 +151,12 @@ def _units_by_key(source: str, path: str) -> dict[tuple[str, CodeUnitKind], Code
 def detect_changes(
     repo: str, base: str, head: str | None = None, src_paths: list[str] | None = None
 ) -> list[ChangeImpact]:
-    """Full change detection between two revisions for Python source files."""
+    """Full change detection between two revisions for any supported source file."""
     src_paths = src_paths or ["src"]
     impacts: list[ChangeImpact] = []
     for status, path in changed_files(repo, base, head):
+        # Neetigya, 2026-07-23: was `if not path.endswith(".py")` — now accepts any
+        # extension the universal parser handles (py / ts / tsx / js / jsx / java).
         ext = "." + path.rsplit(".", 1)[-1].lower() if "." in path else ""
         if ext not in CODE_EXTENSIONS:
             continue

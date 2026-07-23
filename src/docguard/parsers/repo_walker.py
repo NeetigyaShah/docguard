@@ -28,6 +28,8 @@ def _iter_files(root: Path, subdirs: list[str], exts: set[str]) -> list[str]:
     return sorted(set(out))
 
 
+# Neetigya, 2026-07-23: `find_code` now uses CODE_EXTENSIONS (py/ts/js/java) instead
+# of a hard-coded {".py"}; `find_docs` gained ".mdx" for MDX doc sites (e.g. likec4).
 def find_code(root: str | Path, src_paths: list[str] | None = None) -> list[str]:
     root = Path(root)
     return _iter_files(root, src_paths or ["src"], CODE_EXTENSIONS)

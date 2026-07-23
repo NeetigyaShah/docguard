@@ -1,3 +1,4 @@
+# Neetigya, 2026-07-23: new file — JavaScript extractor tests.
 """JavaScript extractor: extraction correctness + change detection."""
 
 from __future__ import annotations

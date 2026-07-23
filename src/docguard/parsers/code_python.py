@@ -32,6 +32,9 @@ def _unparse(node: ast.AST | None) -> str | None:
         return None
 
 
+# Neetigya, 2026-07-23: added `_params` / `_unparse` so the Python parser emits
+# structured `Param(name, default)` on every CodeUnit (see `make()` below), matching
+# the new language-agnostic change-detection contract shared with the ts/js/java parsers.
 def _params(node: ast.FunctionDef | ast.AsyncFunctionDef) -> list[Param]:
     a = node.args
     pos = a.posonlyargs + a.args

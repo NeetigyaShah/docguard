@@ -1,3 +1,4 @@
+# Neetigya, 2026-07-23: new file — Java extractor tests.
 """Tests for the Java extractor and its change-detection contract."""
 
 from __future__ import annotations

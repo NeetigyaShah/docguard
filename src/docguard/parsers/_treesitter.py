@@ -1,3 +1,4 @@
+# Neetigya, 2026-07-23: new file — shared tree-sitter helpers for the ts/js/java parsers.
 """Thin tree-sitter helpers shared by the non-Python language parsers.
 
 One grammar API for every language via `tree-sitter-language-pack` (prebuilt

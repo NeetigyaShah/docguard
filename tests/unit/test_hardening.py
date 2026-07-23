@@ -1,3 +1,4 @@
+# Neetigya, 2026-07-22: new file — tests for the mapping-precision + real-LLM repair fixes.
 """Session-3 hardening: mapping precision + real-LLM repair contract.
 
 Both are offline/deterministic — the real repair path is exercised through a

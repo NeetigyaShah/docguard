@@ -12,8 +12,9 @@ requires-python = ">=3.11"
 dependencies = [
     "pydantic>=2.6",
     "pydantic-settings>=2.2",
-    # Universal multi-language code parsing (Python via stdlib ast; TS/JS/Java via
-    # tree-sitter grammars). Prebuilt wheels — no compiler needed in the CI image.
+    # Neetigya, 2026-07-23: added for the universal multi-language parser (Python via
+    # stdlib ast; TS/JS/Java via tree-sitter grammars). Prebuilt wheels — no compiler
+    # needed in the CI image, so the GitHub Action Docker build stays intact.
     "tree-sitter>=0.21",
     "tree-sitter-language-pack>=0.9",
 ]

@@ -30,6 +30,10 @@ class CodeUnitKind(str, Enum):
     ENDPOINT = "endpoint"
 
 
+# Neetigya, 2026-07-23: added for the universal multi-language parser. `Param`
+# plus `CodeUnit.params` and `ChangeImpact.old_params/new_params` (below) make
+# change detection language-agnostic — every parser fills structured params, so
+# rename/default logic no longer re-parses source with Python-only regex.
 class Param(BaseModel):
     """A single function/method parameter, normalized across languages.
 
@@ -57,7 +61,7 @@ class CodeUnit(BaseModel):
     end_line: int
     source: str = ""
     symbols: list[str] = Field(default_factory=list)
-    params: list[Param] = Field(default_factory=list)
+    params: list[Param] = Field(default_factory=list)  # Neetigya, 2026-07-23: structured params
 
     @staticmethod
     def make_id(file: str, qualified_name: str, kind: CodeUnitKind) -> str:
@@ -148,8 +152,8 @@ class ChangeImpact(BaseModel):
     kind: CodeUnitKind | None = None
     old_source: str = ""
     new_source: str = ""
-    old_params: list[Param] = Field(default_factory=list)
-    new_params: list[Param] = Field(default_factory=list)
+    old_params: list[Param] = Field(default_factory=list)  # Neetigya, 2026-07-23
+    new_params: list[Param] = Field(default_factory=list)  # Neetigya, 2026-07-23
     change_kinds: list[ChangeKind] = Field(default_factory=list)
     meaningful: bool = False
     significance: float = 0.0  # 0..1
