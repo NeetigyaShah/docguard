@@ -6,6 +6,8 @@ build-backend = "setuptools.build_meta"
 name = "docguard"
 version = "0.1.0"
 description = "Self-Healing Technical Documentation: detect stale docs from code changes and generate targeted, validated corrections."
+readme = "README.md"
+license = { text = "MIT" }
 requires-python = ">=3.11"
 dependencies = [
     "pydantic>=2.6",
