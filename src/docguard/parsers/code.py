@@ -40,6 +40,11 @@ def _ext(path: str) -> str:
 
 
 def parse_code_source(source: str, path: str) -> list[CodeUnit]:
+    # A UTF-8 BOM (common on Windows-authored files, and preserved by `git show`)
+    # makes `ast.parse` raise and silently yields zero code units — i.e. DocGuard
+    # would report "no changes" on every file. Strip it at the single entry point
+    # every source string flows through (disk reads *and* git revisions).
+    source = source.lstrip("﻿")
     target = _DISPATCH.get(_ext(path))
     if not target:
         return []

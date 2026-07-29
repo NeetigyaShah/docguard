@@ -29,7 +29,8 @@ def _symbols(text: str) -> list[str]:
 
 
 def parse_markdown_source(text: str, doc_path: str) -> list[DocSection]:
-    lines = text.splitlines()
+    # strip a UTF-8 BOM so a leading `# Heading` is still recognised (see code.py)
+    lines = text.lstrip("﻿").splitlines()
     # locate heading lines (ignoring those inside fenced code blocks)
     headings: list[tuple[int, int, str]] = []  # (line_idx, level, title)
     in_fence = False
