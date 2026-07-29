@@ -28,6 +28,23 @@ from docguard.models import (
 REPO_ROOT = Path(__file__).resolve().parent.parent.parent
 
 
+def _fixture_repo() -> str:
+    """A throwaway repo whose docs/api.md actually contains the section text.
+
+    plan_actions now reads the real file to build the full patched content (an
+    auto-fix PR must never push empty content), so these scenarios need a doc on
+    disk rather than a purely in-memory PipelineResult.
+    """
+    import tempfile
+
+    root = Path(tempfile.mkdtemp(prefix="docguard-p5-"))
+    (root / "docs").mkdir(parents=True, exist_ok=True)
+    (root / "docs" / "api.md").write_text(
+        "# API\n\n## create_user\n\n`create_user` accepts `role`.\n", encoding="utf-8"
+    )
+    return str(root)
+
+
 def _section(heading):
     return DocSection(id=f"docs/api.md#{heading}", doc_path="docs/api.md", heading=heading,
                       heading_path=["API", heading], content=f"`{heading}` accepts `role`.",
@@ -45,7 +62,7 @@ def _result(*, with_autofix=True, with_review=True) -> PipelineResult:
                                      label=StalenessLabel.STALE, confidence=0.92,
                                      reason="param renamed", stale_claims=["role"], risk=RiskLevel.LOW),
             repair=Repair(doc_section_id=s.id, original_content="`create_user` accepts `role`.",
-                          repaired_content="`create_user` accepts `user_role`.", changed=True),
+                          repaired_content="`create_user` accepts `user_role`.", changed=True),  # matches _fixture_repo()
             validation=ValidationResult(ok=True), confidence=ConfidenceLevel.HIGH, action=Action.AUTO_FIX,
         ))
         autofix += 1
@@ -62,7 +79,7 @@ def _result(*, with_autofix=True, with_review=True) -> PipelineResult:
         ))
         review += 1
         stale += 1
-    return PipelineResult(sections_verified_accurate=2, sections_stale=stale,
+    return PipelineResult(repo=_fixture_repo(), sections_verified_accurate=2, sections_stale=stale,
                           autofixes_generated=autofix, review_needed=review, results=results)
 
 

@@ -48,6 +48,8 @@ def cmd_action(args) -> int:
         head_ref=os.environ.get("GITHUB_HEAD_REF", ""),
         commit_message=os.environ.get("DOCGUARD_COMMIT_MSG", ""),
         run_id=os.environ.get("GITHUB_RUN_ID", "1"),
+        repo_root=repo,
+        auto_fix=settings.auto_fix,
     )
     print(json.dumps({"summary": {
         "accurate": result.sections_verified_accurate,
