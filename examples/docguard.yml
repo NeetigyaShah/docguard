@@ -1,0 +1,40 @@
+# DocGuard — drop this file into YOUR repo at .github/workflows/docguard.yml
+#
+# On every pull request it diffs the PR, finds documentation made stale by the
+# code change, and posts a review comment (or opens a docs-fix PR).
+# Runs fully offline by default — no API key, no signup.
+
+name: DocGuard
+
+on:
+  pull_request:
+    # Optional: only run when code or docs actually changed.
+    paths:
+      - "src/**"
+      - "docs/**"
+
+permissions:
+  contents: write        # create the docguard/fix-* branch (only needed for auto-fix)
+  pull-requests: write   # post / update the review comment
+
+jobs:
+  docguard:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          fetch-depth: 0   # required: DocGuard needs history to diff against the PR base
+
+      - uses: NeetigyaShah/docguard@v1
+        with:
+          src-paths: src            # comma-separated, e.g. "src,lib"
+          docs-paths: docs          # comma-separated, e.g. "docs,README.md dir"
+          auto-fix: "false"         # "true" = open a docs-fix PR for high-confidence fixes
+
+          # Optional: use a real LLM for semantic staleness detection.
+          # Leave as "mock" for the deterministic, offline, zero-cost default.
+          llm-provider: mock        # mock | openai | anthropic
+        env:
+          # Only needed if llm-provider is not "mock":
+          OPENAI_API_KEY: ${{ secrets.OPENAI_API_KEY }}
+          ANTHROPIC_API_KEY: ${{ secrets.ANTHROPIC_API_KEY }}
