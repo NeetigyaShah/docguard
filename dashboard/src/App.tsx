@@ -40,23 +40,38 @@ export function App() {
   if (!bundle) return <div className="app"><p>Loading…</p></div>;
 
   return (
-    <div className="app">
-      <aside className="side">
-        <div className="brand">📘 DocGuard</div>
-        <div className="sub">Self-Healing Docs</div>
-        <nav>
-          {TABS.map((t) => (
-            <button key={t} className={t === tab ? "active" : ""} onClick={() => setTab(t)}>
-              {t}
-            </button>
-          ))}
-        </nav>
-        <button className="refresh" onClick={load}>↻ Refresh</button>
-        <div className="gen">state @ {new Date(bundle.generatedAt).toLocaleTimeString()}</div>
-      </aside>
-      <main className="main">
-        <View tab={tab} b={bundle} />
-      </main>
+    <div className="shell">
+      <header className="topbar">
+        <div className="title">
+          <span className="logo">📘</span>
+          <div>
+            <div className="tname">DocGuard</div>
+            <div className="tsub">Self-Healing Documentation CI</div>
+          </div>
+        </div>
+        <div className="topmeta">
+          <span className="pill">phase {String((bundle.state as Record<string, unknown>).current_phase ?? "—")}</span>
+          <button className="refresh" onClick={load}>↻ Refresh</button>
+          <a className="ghlink" href="https://github.com/NeetigyaShah/docguard" target="_blank" rel="noreferrer">
+            GitHub ↗
+          </a>
+        </div>
+      </header>
+      <div className="app">
+        <aside className="side">
+          <nav>
+            {TABS.map((t) => (
+              <button key={t} className={t === tab ? "active" : ""} onClick={() => setTab(t)}>
+                {t}
+              </button>
+            ))}
+          </nav>
+          <div className="gen">state @ {new Date(bundle.generatedAt).toLocaleTimeString()}</div>
+        </aside>
+        <main className="main">
+          <View tab={tab} b={bundle} />
+        </main>
+      </div>
     </div>
   );
 }

@@ -46,8 +46,17 @@ const bundle = {
   generatedAt: new Date().toISOString(),
 };
 
+const out = join(outDir, "orchestrator.json");
+
+// ponytail: no .orchestrator/ (e.g. Vercel builds only the dashboard dir) -> keep the
+// checked-in bundle instead of clobbering it with an empty one.
+if (bundle.features.length === 0 && existsSync(out)) {
+  console.log("collect: no .orchestrator data found, keeping existing public/orchestrator.json");
+  process.exit(0);
+}
+
 mkdirSync(outDir, { recursive: true });
-writeFileSync(join(outDir, "orchestrator.json"), JSON.stringify(bundle, null, 2));
+writeFileSync(out, JSON.stringify(bundle, null, 2));
 console.log(
   `collect: ${bundle.features.length} features, ${bundle.tests.length} test records, ${bundle.activity.length} activity events`
 );
