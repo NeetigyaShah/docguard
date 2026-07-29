@@ -26,6 +26,9 @@ inputs:
   base:
     description: "Base git ref to diff against (defaults to the PR base / previous commit)"
     default: ""
+  github-token:
+    description: "Token used to comment / open the docs-fix PR. Defaults to the workflow's GITHUB_TOKEN."
+    default: "${{ github.token }}"
 
 runs:
   using: "docker"
